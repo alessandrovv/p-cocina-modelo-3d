@@ -21,7 +21,7 @@ Contexto del usuario (útil para decisiones de diseño):
 
 ## 2. Cómo ejecutarlo
 
-No hay `package.json`, dependencias, build ni tests. Three.js r186 se carga desde jsDelivr con un *import map* declarado en `index.html`:
+No hay `package.json`, dependencias, build ni tests (el despliegue está en la sección 12). Three.js r186 se carga desde jsDelivr con un *import map* declarado en `index.html`:
 
 ```html
 "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
@@ -247,6 +247,21 @@ No hay tests automatizados. Después de un cambio:
 
 `images/` contiene la información original: `dibujo_vista_superior.jpeg` (planta con cotas), `dibujo_vista_frontal_pared{1..4}.jpeg` (alzados a mano) y `foto_pared{1..4}.jpeg` (fotos de cada pared). Consúltalos antes de cambiar una medida `[C]` o al justificar una `[I]`/`[E]`. No los muevas ni los renombres: `dimensiones.js` se refiere a ellos.
 
-## 12. Estado del repositorio
+## 12. Repositorio y despliegue
 
-La carpeta no está bajo control de versiones (no hay `.git`). Antes de cambios grandes o destructivos, avisa al usuario o sugiere inicializar un repositorio.
+- La raíz del repositorio git es `cocina/`. Remoto: `git@github-personal:alessandrovv/p-cocina-modelo-3d.git` (alias SSH `github-personal` de la cuenta personal). Rama principal: `main`.
+- El repositorio de GitHub es **público**: todo lo que se suba (incluidas las fotos de `images/`) es visible.
+- No hagas commits, push ni cambios de configuración de git sin que el usuario lo pida.
+- `gh` en esta máquina puede estar autenticado con otra cuenta (de trabajo). Para operar sobre este repositorio con `gh`, confirma antes la cuenta activa (`gh auth status`) y usa `--repo alessandrovv/p-cocina-modelo-3d`.
+
+**Despliegue:** `.github/workflows/deploy.yml` publica en Cloudflare Pages en cada push a `main` (y a mano con `workflow_dispatch`):
+
+1. `rsync` copia el repositorio a `$RUNNER_TEMP/dist` excluyendo `.git/`, `.github/`, `images/` y `*.md`.
+2. `cloudflare/wrangler-action@v4` (Wrangler 4) crea el proyecto `cocina` si no existe (`|| true` cuando ya existe) y ejecuta `pages deploy`.
+3. Necesita los secretos `CLOUDFLARE_API_TOKEN` (permiso *Account → Cloudflare Pages → Edit*) y `CLOUDFLARE_ACCOUNT_ID`.
+
+Implicaciones al editar:
+
+- Cualquier archivo nuevo que deba servirse tiene que quedar fuera de esas exclusiones. Si agregas archivos que **no** deben publicarse (notas, scripts, datos privados), añádelos a las exclusiones del `rsync`.
+- El sitio desplegado no tiene paso de build: lo que hay en el repositorio es lo que se sirve. No introduzcas rutas que solo funcionen con el servidor local.
+- Las rutas son relativas (`css/…`, `js/…`, `reposteros.html`), así que el sitio funciona en la raíz del dominio o en un subdirectorio; mantenlo así.

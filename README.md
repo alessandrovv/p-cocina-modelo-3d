@@ -43,6 +43,31 @@ También funciona la extensión **Live Server** de VS Code o Cursor: clic derech
 
 Si cambias un archivo `.js` y el navegador no refleja el cambio, recarga sin caché (Ctrl+Shift+R).
 
+## Despliegue en Cloudflare Pages
+
+El sitio se publica automáticamente en Cloudflare Pages con GitHub Actions (`.github/workflows/deploy.yml`) en cada push a `main`. También se puede lanzar a mano desde la pestaña *Actions* → *Desplegar en Cloudflare Pages* → *Run workflow*.
+
+El workflow copia el sitio a una carpeta temporal **sin** `images/`, sin los archivos `.md` y sin `.git`/`.github`, y la sube con `wrangler pages deploy`. La primera vez crea el proyecto `cocina` en Cloudflare; la URL queda como `https://cocina.pages.dev` (si el nombre está tomado, Cloudflare añade un sufijo y lo muestra en el log del despliegue).
+
+### Configuración inicial (una sola vez)
+
+1. **Token de API de Cloudflare.** En el panel de Cloudflare: *My Profile* → *API Tokens* → *Create Token* → *Create Custom Token*, con el permiso **Account → Cloudflare Pages → Edit** sobre tu cuenta.
+2. **ID de cuenta.** Está en el panel de Cloudflare, en *Workers & Pages* (columna derecha, *Account ID*), o en la URL del panel: `dash.cloudflare.com/<ACCOUNT_ID>/...`.
+3. **Secretos en GitHub.** En el repositorio: *Settings* → *Secrets and variables* → *Actions* → *New repository secret*:
+   - `CLOUDFLARE_API_TOKEN`: el token del paso 1.
+   - `CLOUDFLARE_ACCOUNT_ID`: el ID del paso 2.
+
+   O desde la terminal, con `gh` autenticado en la cuenta dueña del repositorio:
+
+   ```bash
+   gh secret set CLOUDFLARE_API_TOKEN --repo alessandrovv/p-cocina-modelo-3d
+   gh secret set CLOUDFLARE_ACCOUNT_ID --repo alessandrovv/p-cocina-modelo-3d
+   ```
+
+4. Hacer push a `main` (o ejecutar el workflow a mano) y revisar el log del paso *Desplegar en Cloudflare Pages*, que muestra la URL publicada.
+
+Para cambiar el nombre del proyecto de Cloudflare, edita `PROYECTO_PAGES` en el workflow.
+
 ## Uso del modelo 3D
 
 **Ratón:** arrastrar para rotar, rueda para zoom, clic derecho o Shift+arrastrar para desplazar.
@@ -90,6 +115,8 @@ La versión activa se elige con el parámetro `?v=1` o `?v=2` en la URL y se rec
 
 ```
 cocina/
+├── .github/workflows/
+│   └── deploy.yml          Despliegue automático en Cloudflare Pages
 ├── index.html              Modelo 3D (barra de herramientas + import map de Three.js)
 ├── reposteros.html         Planos, cortes, planchas, herrajes, presupuesto y notas
 ├── css/

@@ -1,0 +1,41 @@
+name: Desplegar en Cloudflare Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-pages
+  cancel-in-progress: true
+
+env:
+  PROYECTO_PAGES: cocina-3d
+
+jobs:
+  deploy:
+    name: Desplegar
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - uses: actions/checkout@v6
+
+      # Las fotos de la casa y la documentación no se publican.
+      - name: Preparar archivos publicables
+        run: >
+          rsync -a
+          --exclude '.git/' --exclude '.github/' --exclude 'images/' --exclude '*.md'
+          ./ "$RUNNER_TEMP/dist/"
+
+      - name: Desplegar en Cloudflare Pages
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '4'
+          # Crea el proyecto la primera vez; en los siguientes despliegues falla porque ya existe.
+          preCommands: wrangler pages project create ${{ env.PROYECTO_PAGES }} --production-branch=main || true
+          command: pages deploy ${{ runner.temp }}/dist --project-name=${{ env.PROYECTO_PAGES }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
