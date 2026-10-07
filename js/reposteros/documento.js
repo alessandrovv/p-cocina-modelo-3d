@@ -10,6 +10,7 @@ import {
   cambiarVersion,
   resolverApoyos,
   resolverModulos,
+  tiradorAbajo,
   validarReposteros,
 } from '../config/reposteros.js';
 import { PRECIOS } from '../config/precios.js';
@@ -188,12 +189,13 @@ function estructuraPared(id, P, h) {
     out += text(((v.z0 + v.z1) / 2) * S, (H - v.y0) * S * 0.5, 'Ventana', 'tnota');
     const l = D.lavadero;
     out += rect((l.centroDesdePared2 - l.largo / 2) * S, h - D.mesas.alto * S, l.largo * S, l.profundidad * S, 'lavadero');
-    for (const z of REPOSTEROS.zonasLibres) {
-      const yb0 = D.mesas.zocalo.alto;
-      const yb1 = D.mesas.alto - D.mesas.espesorLosa;
-      out += rect(z.u[0] * S, h - yb1 * S, (z.u[1] - z.u[0]) * S, (yb1 - yb0) * S, 'libre');
-      out += text(((z.u[0] + z.u[1]) / 2) * S, h - ((yb0 + yb1) / 2) * S, 'libre (lavadero)', 'tnota');
-    }
+  }
+  for (const z of REPOSTEROS.zonasLibres.filter((x) => x.pared === id)) {
+    const yb0 = D.mesas.zocalo.alto;
+    const yb1 = D.mesas.alto - D.mesas.espesorLosa;
+    const [x, w] = span(z.u[0], z.u[1]);
+    out += rect(x, h - yb1 * S, w, (yb1 - yb0) * S, 'libre');
+    out += text(x + w / 2, h - ((yb0 + yb1) / 2) * S, z.id === 'lavadero' ? 'libre (lavadero)' : 'libre', 'tnota');
   }
   // Mesas: losa, zócalo y pilares.
   const losa = D.mesas.espesorLosa * S;
@@ -230,8 +232,8 @@ function moduloEnAlzado(m, P, h) {
   for (const p of hojas) {
     const a = Math.min(sx(p.u0), sx(p.u1));
     const b = Math.max(sx(p.u0), sx(p.u1));
-    const yt = h - (m.y1 - 0.0015) * S;
-    const yb = h - (m.y0 + 0.0015) * S;
+    const yt = h - (p.y1 ?? m.y1 - 0.0015) * S;
+    const yb = h - (p.y0 ?? m.y0 + 0.0015) * S;
     out += rect(a, yt, b - a, yb - yt, p.tipo === 'tapa' ? 'tapa' : 'puerta');
     if (p.tipo === 'tapa') {
       out += text((a + b) / 2, (yt + yb) / 2, 'tapa fija', 'tnota');
@@ -243,10 +245,13 @@ function moduloEnAlzado(m, P, h) {
     const xo = bisagraEnA ? b : a;
     out += `<polyline points="${xo},${yt} ${xv},${(yt + yb) / 2} ${xo},${yb}" class="apertura"/>`;
     const xt = bisagraEnA ? b - 40 : a + 40;
-    out += line(xt, yb - 40, xt, yb - 40 - REPOSTEROS.tirador.largo * S, 'tirador');
+    const lt = REPOSTEROS.tirador.largo * S;
+    const ya = tiradorAbajo(p, D) ? yb - 40 : yt + 40 + lt;
+    out += line(xt, ya, xt, ya - lt, 'tirador');
   }
   const cx = x0 + w / 2;
-  const cy = m.tipo === 'bajo' ? y + 110 : y + alto / 2;
+  // En las columnas el código va en el tramo alto, lejos de la división de puertas.
+  const cy = m.tipo === 'bajo' ? y + 110 : m.hastaMesa ? h - ((REPOSTEROS.altos.y0 + m.y1) / 2) * S : y + alto / 2;
   out += `<circle cx="${cx}" cy="${cy}" r="62" class="id-bg"/>` + text(cx, cy + 22, m.id, 'tid');
   return out;
 }
@@ -369,10 +374,16 @@ function planta() {
 
 // ── Tablas
 function tablaModulos() {
+  const ordenPared = { pared2: 0, pared3: 1, pared1: 2 };
   const filas = modulos
     .filter((m) => m.tipo !== 'relleno')
+    .sort((a, b) => (a.tipo === 'bajo') - (b.tipo === 'bajo') || ordenPared[a.pared] - ordenPared[b.pared] || a.u0 - b.u0)
     .map((m) => {
-      const puertas = m.puertas.length ? m.puertas.map((p) => cm(p.u1 - p.u0)).join(' + ') : '—';
+      const puertas = !m.puertas.length
+        ? '—'
+        : m.tramosPuertas
+          ? m.puertas.map((p) => `${cm(p.u1 - p.u0)} × ${cm(p.y1 - p.y0)} (${tiradorAbajo(p, D) ? 'arriba' : 'abajo'})`).join(' + ')
+          : m.puertas.map((p) => cm(p.u1 - p.u0)).join(' + ');
       const libres = (() => {
         const ys = [m.y0 + REPOSTEROS.material.espesor, ...m.repisas.flatMap((y) => [y, y + REPOSTEROS.material.espesor]), m.y1 - REPOSTEROS.material.espesor];
         const out = [];
@@ -380,7 +391,7 @@ function tablaModulos() {
         return out.join(' / ');
       })();
       const pared = { pared1: 'Pared 1', pared2: 'Pared 2', pared3: 'Pared 3' }[m.pared];
-      return `<tr><td><b>${m.id}</b></td><td>${m.tipo === 'alto' ? 'Alto' : 'Bajo abierto'}</td><td>${pared}</td>
+      return `<tr><td><b>${m.id}</b></td><td>${m.hastaMesa ? 'Columna hasta la mesa' : m.tipo === 'alto' ? 'Alto' : 'Bajo abierto'}</td><td>${pared}</td>
         <td class="n">${cm(m.ancho)}</td><td class="n">${cm(m.alto)}</td><td class="n">${cm(m.fondo + (m.puertas.length || m.tapaFija ? REPOSTEROS.material.espesor : 0))}</td>
         <td class="n">${cm(m.y0)}</td><td class="n">${m.repisas.length}</td><td>${libres}</td><td>${puertas}${m.tapaFija ? ' + tapa fija ' + cm(m.tapaFija.u1 - m.tapaFija.u0) : ''}</td>
         <td>${m.espalda === 'melamina' ? 'Melamina 18 mm (vista)' : 'MDF 3 mm'}</td><td>${esc(m.contenido)}</td></tr>`;

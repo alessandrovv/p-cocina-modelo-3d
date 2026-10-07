@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
-import { REPOSTEROS, resolverModulos, resolverApoyos, cajaMundo } from '../config/reposteros.js';
+import { REPOSTEROS, resolverModulos, resolverApoyos, cajaMundo, tiradorAbajo } from '../config/reposteros.js';
 import { addEdges, boxBetween, setShadows } from '../utils/geometry.js';
 
 const edgeGhost = new THREE.LineBasicMaterial({ color: 0x2f6fd6, transparent: true, opacity: 0.5 });
@@ -15,8 +15,7 @@ function tirador(m, hoja, d, M) {
   const t = REPOSTEROS.tirador;
   const esp = REPOSTEROS.material.espesor;
   const uc = hoja.bisagra === 'inicio' ? hoja.u1 - t.retiroBorde : hoja.u0 + t.retiroBorde;
-  // En los altos va abajo; en los bajos (si tuvieran puertas) iría arriba.
-  const yc = m.tipo === 'alto' ? m.y0 + 0.04 + t.largo / 2 : m.y1 - 0.04 - t.largo / 2;
+  const yc = tiradorAbajo(hoja, d) ? hoja.y0 + t.retiroBorde + t.largo / 2 : hoja.y1 - t.retiroBorde - t.largo / 2;
   const front = m.d1 + esp;
   return boxBetween(
     ...Object.values(cajaMundo(m.pared, [uc - 0.006, uc + 0.006], [front, front + 0.025], [yc - t.largo / 2, yc + t.largo / 2], d)),
@@ -55,7 +54,7 @@ function buildModule(m, d, M) {
   const yH = [m.y0 + g / 2, m.y1 - g / 2];
   if (m.tapaFija) group.add(panel(m, [m.tapaFija.u0, m.tapaFija.u1], [m.d1, m.d1 + esp], yH, M.melamina, 'tapa fija', d));
   for (const hoja of m.puertas) {
-    puertas.add(panel(m, [hoja.u0, hoja.u1], [m.d1, m.d1 + esp], yH, M.melamina, 'puerta', d));
+    puertas.add(panel(m, [hoja.u0, hoja.u1], [m.d1, m.d1 + esp], [hoja.y0, hoja.y1], M.melamina, 'puerta', d));
     puertas.add(tirador(m, hoja, d, M));
   }
   group.add(puertas);

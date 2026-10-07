@@ -243,35 +243,97 @@ export const VERSIONES = {
   2: {
     nombre: 'Versión 2',
     descripcion:
-      'Altos bajados a 1.40 m (50 cm sobre la mesa) para alcanzarlos con 1.50 m de estatura; sin repostero sobre la estufa',
+      'Altos a 1.40 m (50 cm sobre la mesa) para alcanzarlos con 1.50 m de estatura; sin repostero sobre la estufa; columna de uso diario hasta la mesa y verdulero en la Pared 3',
     aplicar: (R) => {
-      const u = (id) => R.modulos.find((m) => m.id === id).u;
       const esp = R.material.espesor;
-      const tubo = 0.025;
+      const mesa = DIM.mesas;
+      const finMesa = mesa.izquierda.largoPared3; // 1.95: extremo junto a la refrigeradora
+      // Verdulero de pie frente al extremo de la mesa; la columna C1 queda a su lado
+      // para que el verdulero no estorbe el acceso.
+      const verdulero = { ancho: 0.4, fondo: 0.27, alto: 1.0 };
+      const uVerdulero = [finMesa - verdulero.ancho, finMesa];
+      const uColumna = [uVerdulero[0] - 0.4, uVerdulero[0]];
+      const paredTres = (m) => m.pared === 'pared3' && m.tipo !== 'relleno';
       return {
         ...R,
         altos: { ...R.altos, y0: 1.4 },
-        modulos: R.modulos
-          .filter((m) => m.id !== 'A2')
-          .map((m) => (m.tipo === 'alto' && m.y0 === undefined && m.repisas === 2 ? { ...m, repisas: REPISAS_V2 } : m)),
+        modulos: [
+          ...R.modulos
+            .filter((m) => m.id !== 'A2' && !paredTres(m))
+            .map((m) => (m.tipo === 'alto' && m.y0 === undefined && m.repisas === 2 ? { ...m, repisas: REPISAS_V2 } : m)),
+          {
+            id: 'A5',
+            tipo: 'alto',
+            pared: 'pared3',
+            u: [0.4, uColumna[0]],
+            repisas: REPISAS_V2,
+            puertas: 2,
+            espalda: 'melamina',
+            contenido: 'Abarrotes y conservas',
+          },
+          {
+            id: 'C1',
+            tipo: 'alto',
+            pared: 'pared3',
+            u: uColumna,
+            y0: mesa.alto,
+            hastaMesa: true,
+            // Abajo: cubiertos y tazas (18 cm) y platos (26 cm); la repisa a 1.40 m divide las puertas.
+            repisas: [0.18, 0.264, ...REPISAS_V2],
+            // La puerta baja abre hacia A5 para no chocar con el verdulero; la alta, hacia A6,
+            // para no chocar con la hoja vecina de A5.
+            tramosPuertas: [
+              { hasta: 1.4, puertas: 1, bisagra: 'inicio' },
+              { puertas: 1, bisagra: 'fin' },
+            ],
+            espalda: 'melamina',
+            contenido: 'Uso diario, hasta la mesa: cubiertos y tazas, platos, vasos; sostiene A5 y A6',
+          },
+          {
+            id: 'A6',
+            tipo: 'alto',
+            pared: 'pared3',
+            u: uVerdulero,
+            repisas: REPISAS_V2,
+            puertas: 1,
+            bisagra: 'fin',
+            espalda: 'melamina',
+            contenido: 'Sobre el verdulero: artículos de poco uso',
+          },
+          { id: 'B2', tipo: 'bajo', pared: 'pared3', u: [0.6, 1.075], repisas: [0.4], contenido: 'Ollas y sartenes (40 cm libres abajo)' },
+          { id: 'B3', tipo: 'bajo', pared: 'pared3', u: [1.075, uVerdulero[0]], repisas: 2, contenido: 'Tapers y recipientes' },
+        ],
         // La Pared 3 (ladrillo de soga sin tarrajeo, borde superior libre) solo mantiene
-        // los altos verticales: el peso baja a la mesa y el techo de losa toma el vuelco.
+        // los altos verticales: C1 y P1 bajan el peso a la mesa y el techo de losa toma el vuelco.
         apoyos: [
           {
             id: 'P1',
             tipo: 'panel',
             pared: 'pared3',
-            u: [u('A6')[1] - esp, u('A6')[1]],
+            u: [finMesa - esp, finMesa],
             d: [0, R.altos.fondo + esp],
-            contenido: 'Pie de melamina bajo el extremo de A6, sobre el pilar de la mesa',
+            contenido: 'Pie de melamina bajo el extremo de A6, sobre el pilar de la mesa (queda detrás del verdulero)',
           },
+        ],
+        zonasLibres: [
+          ...R.zonasLibres,
           {
-            id: 'T1',
-            tipo: 'tubo',
+            id: 'verdulero',
             pared: 'pared3',
-            u: [u('A5')[1] - tubo / 2, u('A5')[1] + tubo / 2],
-            d: [R.altos.fondo - 0.03 - tubo, R.altos.fondo - 0.03],
-            contenido: 'Tubo de aluminio blanco de 1" bajo la unión de A5 y A6',
+            u: [uVerdulero[0], mesa.izquierda.largoPared3 - mesa.retiroPilar - mesa.espesorPilar],
+            contenido: 'libre (detrás del verdulero)',
+          },
+        ],
+        equipos: [
+          ...R.equipos,
+          {
+            id: 'verdulero',
+            nombre: 'Verdulero',
+            pared: 'pared3',
+            u: uVerdulero,
+            d: [mesa.fondo + 0.01, mesa.fondo + 0.01 + verdulero.fondo],
+            y: [0, verdulero.alto],
+            grupo: 'izquierda',
           },
         ],
         montaje: 'desmontable',
@@ -324,15 +386,32 @@ function alturasRepisas(spec, yi0, yi1, esp) {
 }
 
 /** Puertas sobrepuestas con holgura perimetral y entre hojas. */
-function hojas(u0, u1, n, bisagra, g) {
+function hojas(u0, u1, n, bisagra, g, y0, y1) {
   const ancho = (u1 - u0 - g * n) / n;
   return Array.from({ length: n }, (_, k) => {
     const a = u0 + g / 2 + k * (ancho + g);
     return {
       u0: a,
       u1: a + ancho,
+      y0: y0 + g / 2,
+      y1: y1 - g / 2,
       bisagra: n === 1 ? bisagra ?? 'inicio' : k === 0 ? 'inicio' : 'fin',
     };
+  });
+}
+
+/**
+ * Tramos verticales de puertas, de abajo arriba. Sin `tramosPuertas` hay un solo
+ * tramo de toda la altura con `puertas` hojas.
+ */
+function puertasDe(m, [u0, u1], y0, y1, g) {
+  const tramos = m.tramosPuertas ?? (m.puertas ? [{ puertas: m.puertas, bisagra: m.bisagra }] : []);
+  let yb = y0;
+  return tramos.flatMap((t) => {
+    const yt = t.hasta ?? y1;
+    const out = hojas(u0, u1, t.puertas, t.bisagra, g, yb, yt);
+    yb = yt;
+    return out;
   });
 }
 
@@ -362,7 +441,7 @@ export function resolverModulos(R = REPOSTEROS, d = DIM) {
     const espEspalda = espalda === 'melamina' ? esp : R.material.espesorFondo;
     const repisas = alturasRepisas(m.repisas, y0 + esp, y1 - esp, esp);
     const zonaPuertas = m.tapaFija ? [m.tapaFija[1], u1] : [u0, u1];
-    const puertas = m.puertas ? hojas(zonaPuertas[0], zonaPuertas[1], m.puertas, m.bisagra, g) : [];
+    const puertas = puertasDe(m, zonaPuertas, y0, y1, g);
     const tapaFija = m.tapaFija ? { u0: m.tapaFija[0] + g / 2, u1: m.tapaFija[1] - g / 2 } : null;
     return {
       ...base,
@@ -375,6 +454,11 @@ export function resolverModulos(R = REPOSTEROS, d = DIM) {
       frente: d1 + (puertas.length || tapaFija ? esp : 0),
     };
   });
+}
+
+/** Tirador abajo en las puertas altas; arriba en las que arrancan desde la mesa. */
+export function tiradorAbajo(hoja, d = DIM) {
+  return hoja.y0 > d.mesas.alto + 0.1;
 }
 
 /** Apoyos de los altos sobre la mesa (de la cara superior de la mesa a la base del alto). */
@@ -432,8 +516,12 @@ export function validarReposteros(R = REPOSTEROS, d = DIM) {
   }
 
   const encimaMesa = d.mesas.alto;
+  const largoMesa = { pared3: d.mesas.izquierda.largoPared3, pared2: d.mesas.izquierda.largoPared2 };
   for (const m of mods) {
-    if (m.tipo === 'alto' && m.y0 - encimaMesa < 0.5 - 1e-6)
+    if (m.hastaMesa) {
+      if (Math.abs(m.y0 - encimaMesa) > 1e-6) avisos.push(`El módulo ${m.id} debe apoyarse sobre la mesa.`);
+      if (m.u1 > (largoMesa[m.pared] ?? 0) + 1e-6) avisos.push(`El módulo ${m.id} queda fuera de la mesa.`);
+    } else if (m.tipo === 'alto' && m.y0 - encimaMesa < 0.5 - 1e-6)
       avisos.push(`El módulo ${m.id} queda a menos de 50 cm sobre la mesa.`);
     if (m.tipo === 'alto' && m.y1 > d.ambiente.alto) avisos.push(`El módulo ${m.id} supera la altura del techo.`);
     for (const y of m.repisas ?? [])
@@ -443,8 +531,9 @@ export function validarReposteros(R = REPOSTEROS, d = DIM) {
       avisos.push(`Las repisas del módulo ${m.id} superan 85 cm de luz: pueden pandearse.`);
   }
 
-  const largoMesa = { pared3: d.mesas.izquierda.largoPared3, pared2: d.mesas.izquierda.largoPared2 };
   const equipos = R.equipos.filter((q) => !q.cilindro).map((q) => ({ q, ...cajaMundo(q.pared, q.u, q.d, q.y, d) }));
+  for (const c of cajas)
+    for (const { q, ...b } of equipos) if (seCruzan(c, b)) avisos.push(`El módulo ${c.m.id} choca con ${q.nombre.toLowerCase()}.`);
   for (const a of resolverApoyos(R, d)) {
     if (a.u1 > (largoMesa[a.pared] ?? 0) + 1e-6 || a.d1 > d.mesas.fondo)
       avisos.push(`El apoyo ${a.id} queda fuera de la mesa.`);

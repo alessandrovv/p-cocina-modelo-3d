@@ -40,11 +40,12 @@ function piezasModulo(m, R) {
   if (m.espalda === 'melamina') add('Espalda vista', 1, m.alto, m.ancho, 'estandar', { delgado: 2 * (m.alto + m.ancho) });
   else add('Fondo', 1, m.alto - 0.002, m.ancho - 0.002, 'mdf3');
 
-  const hPuerta = m.alto - g;
   for (const h of m.puertas) {
     const a = h.u1 - h.u0;
-    add('Puerta', 1, hPuerta, a, 'estandar', { grueso: 2 * (hPuerta + a) });
+    const alto = h.y1 - h.y0;
+    add('Puerta', 1, alto, a, 'estandar', { grueso: 2 * (alto + a) });
   }
+  const hPuerta = m.alto - g;
   if (m.tapaFija) {
     const a = m.tapaFija.u1 - m.tapaFija.u0;
     add('Tapa fija', 1, hPuerta, a, 'estandar', { grueso: 2 * (hPuerta + a) });
@@ -111,7 +112,11 @@ export function despiece(R = REPOSTEROS, modulos = resolverModulos(R)) {
       : []),
     { id: 'escuadra', cant: altosVistos.length * 2, nota: '2 por módulo alto de la Pared 3, fijadas al techo' },
     { id: 'tuboApoyo', cant: apoyos.filter((a) => a.tipo === 'tubo').length, nota: 'Apoyo de los altos de la Pared 3 sobre la mesa' },
-    { id: 'regaton', cant: bajos.length * 4, nota: '4 por módulo bajo' },
+    {
+      id: 'regaton',
+      cant: (bajos.length + altos.filter((m) => m.hastaMesa).length) * 4,
+      nota: altos.some((m) => m.hastaMesa) ? '4 por módulo bajo y 4 de goma bajo la columna que apoya en la mesa' : '4 por módulo bajo',
+    },
     { id: 'tornilleria', cant: 1, nota: 'Tornillos 4 × 40 / 4 × 50 mm, tarugos 8 mm, clavos de fondo' },
   ].filter((h) => h.cant > 0);
 
