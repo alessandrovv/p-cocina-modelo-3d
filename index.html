@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cocina · modelo 3D y reposteros</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="css/styles.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="viewport"></div>
+
+    <header class="toolbar">
+      <div class="brand">Cocina <span>reposteros</span></div>
+
+      <div class="group" role="group" aria-label="Versión del diseño">
+        <button type="button" data-version="1" title="Versión 1: altos de 1.50 a 2.30 m">V1</button>
+        <button type="button" data-version="2" title="Versión 2: altos bajados a 1.40 m">V2</button>
+      </div>
+
+      <div class="group" role="group" aria-label="Vistas predefinidas">
+        <button type="button" data-view="iso" class="active" title="Vista inicial (R)">Isométrica</button>
+        <button type="button" data-view="top" title="Planta ortográfica (T)">Superior</button>
+        <button type="button" data-view="pared1" title="Alzado interior de la Pared 1">Pared 1</button>
+        <button type="button" data-view="pared2" title="Alzado interior de la Pared 2">Pared 2</button>
+        <button type="button" data-view="pared3" title="Alzado interior de la Pared 3">Pared 3</button>
+        <button type="button" data-view="pared4" title="Alzado interior de la Pared 4">Pared 4</button>
+      </div>
+
+      <div class="group" role="group" aria-label="Capas">
+        <button type="button" data-toggle="cotas" aria-pressed="false" title="Mostrar cotas (C)">Cotas</button>
+        <button type="button" data-toggle="autoParedes" aria-pressed="true" title="Ocultar las paredes que tapan la vista">Paredes auto</button>
+        <button type="button" data-toggle="techo" aria-pressed="true" title="Techo visible cuando la cámara está por debajo">Techo</button>
+        <button type="button" data-toggle="rejilla" aria-pressed="false" title="Rejilla de 10 cm en el piso">Rejilla</button>
+      </div>
+
+      <div class="group" role="group" aria-label="Reposteros">
+        <button type="button" data-toggle="reposteros" aria-pressed="true" title="Mostrar los reposteros propuestos (antes / después)">Reposteros</button>
+        <button type="button" data-toggle="puertas" aria-pressed="true" title="Quitar las puertas para ver el interior (P)">Puertas</button>
+        <button type="button" data-toggle="equipos" aria-pressed="true" title="Volúmenes de referencia: microondas, freidora, tacho y bidón">Equipos</button>
+      </div>
+
+      <button type="button" id="reset" class="reset" title="Restablecer la vista inicial (R)">Restablecer</button>
+      <a class="reset link" id="planos" href="reposteros.html" target="_blank" rel="noopener" title="Planos acotados, lista de cortes y presupuesto">Planos ↗</a>
+    </header>
+
+    <aside class="legend" id="legend" hidden>
+      <span class="dot dot--confirmada"></span>Confirmada
+      <span class="dot dot--inferida"></span>Inferida
+      <span class="dot dot--estimada"></span>Estimada
+    </aside>
+
+    <div class="hint">Arrastrar: rotar · Rueda: zoom · Clic derecho o Shift+arrastrar: desplazar</div>
+    <div class="avisos" id="avisos" hidden></div>
+
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>

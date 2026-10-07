@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cocina · planos, cortes y presupuesto de reposteros</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="css/reposteros.css" />
+  </head>
+  <body>
+    <header class="cabecera">
+      <div>
+        <h1>Reposteros de cocina · <span id="version-nombre"></span></h1>
+        <p>Melamina blanca de 18 mm · altos con puertas en las Paredes 2 y 3 · bajos abiertos bajo las mesas de cerámica</p>
+        <p class="version-desc" id="version-desc"></p>
+      </div>
+      <nav class="acciones">
+        <span class="versiones" role="group" aria-label="Versión del diseño">
+          <button type="button" data-version="1">V1</button>
+          <button type="button" data-version="2">V2</button>
+        </span>
+        <a href="index.html" id="volver">← Modelo 3D</a>
+        <button type="button" id="imprimir">Imprimir</button>
+      </nav>
+    </header>
+
+    <nav class="indice">
+      <a href="#sec-planos">Planos</a>
+      <a href="#sec-modulos">Módulos</a>
+      <a href="#sec-cortes">Lista de cortes</a>
+      <a href="#sec-planchas">Planchas</a>
+      <a href="#sec-herrajes">Herrajes</a>
+      <a href="#sec-presupuesto">Presupuesto</a>
+      <a href="#sec-notas">Notas</a>
+    </nav>
+
+    <main>
+      <div class="avisos" id="avisos" hidden></div>
+      <section class="resumen" id="resumen"></section>
+
+      <section id="sec-planos">
+        <h2>Planos acotados</h2>
+        <p class="nota">
+          Alzados interiores, tal como se ven desde la cocina. Cotas en centímetros; las alturas se miden desde el piso.
+          El triángulo de cada puerta apunta al lado de las bisagras. En los altos, las líneas discontinuas son las repisas.
+        </p>
+        <div id="alzados" class="laminas"></div>
+        <div id="planta" class="laminas"></div>
+      </section>
+
+      <section id="sec-modulos">
+        <h2>Módulos</h2>
+        <div id="modulos" class="tabla"></div>
+      </section>
+
+      <section id="sec-cortes">
+        <h2>Lista de cortes</h2>
+        <p class="nota">
+          Medidas finales de cada pieza en milímetros (lo que se pide al servicio de corte). Canto delgado: 0.45 mm; canto
+          grueso: 2 mm. Las piezas de los bajos que tocan el piso (laterales y piso) van en melamina RH si esa opción está activa.
+        </p>
+        <div id="cortes" class="tabla"></div>
+      </section>
+
+      <section id="sec-planchas">
+        <h2>Optimización de planchas</h2>
+        <p class="nota">
+          Distribución orientativa con cortes de lado a lado (sierra de 4 mm y 1 cm de refilado por borde). El servicio de corte
+          puede proponer otra distribución equivalente.
+        </p>
+        <div id="planchas" class="hojas"></div>
+      </section>
+
+      <section id="sec-herrajes">
+        <h2>Herrajes</h2>
+        <div id="herrajes" class="tabla"></div>
+      </section>
+
+      <section id="sec-presupuesto">
+        <h2>Presupuesto aproximado</h2>
+        <div class="opciones">
+          <label><input type="checkbox" id="opt-rh" /> Laterales y piso de los bajos en melamina RH (resistente a la humedad)</label>
+          <label><input type="checkbox" id="opt-mo" /> Incluir mano de obra estimada</label>
+          <button type="button" id="restablecer">Restablecer precios</button>
+        </div>
+        <div id="presupuesto" class="tabla"></div>
+      </section>
+
+      <section id="sec-notas">
+        <h2>Notas de fabricación e instalación</h2>
+        <ol class="notas">
+          <li><b>Verificar en obra antes de cortar.</b> Las medidas vienen del modelo; paredes y mesas pueden no estar a escuadra. Conviene confirmar los anchos libres bajo cada mesa y entre pilares.</li>
+          <li data-version="1"><b>Altos de la Pared 3 (A5 y A6).</b> El muro llega a 1.85 m, así que el repostero se apoya en sus <span id="anclaje-cm"></span> cm superiores (franja de ladrillo de <span id="anclaje-desde"></span> a 1.85 m) con colgadores y tarugos de 8 mm. Además, cada módulo se amarra al techo con dos platinas de 25 cm para que no se vuelque. La espalda es de melamina de 18 mm porque queda a la vista desde el otro lado del muro.</li>
+          <li data-version="2"><b>Altos de la Pared 3 (A5 y A6): apoyados en la mesa.</b> El muro es de ladrillo de soga sin tarrajeo (12–13 cm) y tiene el borde superior libre, así que no debe cargar el peso: el pie de melamina P1 (extremo de A6, sobre el pilar de la mesa) y el tubo T1 (unión de A5 y A6) llevan el peso a la mesa. Se atornillan solo al mueble y apoyan sobre la cerámica con goma, sin perforarla. El muro solo sostiene el riel (tarugos de 8 mm en la franja de ladrillo de <span class="anclaje-desde"></span> a 1.85 m) y cada módulo se amarra a la losa del techo con dos platinas de 25 cm. El lado de A5 junto a la esquina se une a A1 a través del relleno R2. La espalda es de melamina de 18 mm porque queda a la vista desde el otro lado del muro.</li>
+          <li data-version="2"><b>Montaje desmontable.</b> Los altos cuelgan de un riel metálico con colgadores regulables: para retirarlos se aflojan los colgadores y se levanta el mueble entero. Los módulos se unen entre sí con pernos (sin cola) y nada se pega ni se sella con silicona a la pared o a la cerámica; los bajos solo se apoyan sobre regatones. Nada se fija a la columna de la esquina de las Paredes 2 y 3: para rehacerla basta retirar A1, R2, A5 y B1. Si la columna se engrosa, A5 tiene 29 cm de margen y A1 se acorta por el tramo de la tapa fija. Conviene armar los cuerpos con uniones desarmables (minifix) en lugar de confirmat.</li>
+          <li><b>Esquina de las Paredes 2 y 3.</b> A1 tiene una tapa fija en el tramo que queda detrás de A5; el relleno R2 separa ambos módulos para que las puertas abran sin chocar.</li>
+          <li data-modulo="A2"><b>Sobre la estufa (A2).</b> Empieza a 1.70 m (80 cm sobre la mesa) porque no hay campana. No guardes ahí plásticos ni productos que se dañen con el calor.</li>
+          <li><b>Bajos abiertos.</b> Se apoyan sobre el zócalo de cerámica con regatones, a 3 cm de la pared y 4 cm por detrás del canto de la mesa. No se atornillan a la cerámica.</li>
+          <li><b>Esquineros (A1, B1 y B5).</b> Tienen fondo de difícil acceso: úsalos para lo que se usa poco. A B5 se llega por el espacio libre bajo el lavadero.</li>
+          <li><b>Bajo el lavadero.</b> Queda libre por las tuberías y la humedad; basta un organizador plástico para productos de limpieza.</li>
+          <li><b>Equipos.</b> Microondas y freidora van sobre la mesa izquierda, debajo de A1, A5 y A6. Sus medidas son de modelos comunes: si los tuyos son más grandes, revisa que quepan. Deja la freidora adelantada mientras funciona para que el vapor no llegue a la melamina.</li>
+        </ol>
+      </section>
+    </main>
+
+    <script type="module" src="js/reposteros/documento.js"></script>
+  </body>
+</html>
