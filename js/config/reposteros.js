@@ -6,6 +6,7 @@
  *   pared2 → u = x (desde la Pared 3), frente hacia +Z
  *   pared3 → u = z (desde la Pared 2), frente hacia +X
  *   pared1 → u = z (desde la Pared 2), frente hacia −X
+ *   pared4 → u = x (desde la Pared 3), frente hacia −Z (solo equipos)
  *
  * Decisiones del usuario:
  *   - Melamina blanca de 18 mm.
@@ -243,29 +244,75 @@ export const VERSIONES = {
   2: {
     nombre: 'Versión 2',
     descripcion:
-      'Altos a 1.40 m (50 cm sobre la mesa) para alcanzarlos con 1.50 m de estatura; sin repostero sobre la estufa; columna de uso diario hasta la mesa y verdulero en la Pared 3',
+      'Altos de 1.40 a 2.20 m y 35 cm de fondo para alcanzarlos con 1.50 m de estatura; sin repostero sobre la estufa; Pared 3 en forma de C con dos columnas apoyadas en la mesa; verdulero junto a la Pared 4',
     aplicar: (R) => {
       const esp = R.material.espesor;
       const mesa = DIM.mesas;
       const finMesa = mesa.izquierda.largoPared3; // 1.95: extremo junto a la refrigeradora
-      // Verdulero de pie frente al extremo de la mesa; la columna C1 queda a su lado
-      // para que el verdulero no estorbe el acceso.
-      const verdulero = { ancho: 0.4, fondo: 0.27, alto: 1.0 };
-      const uVerdulero = [finMesa - verdulero.ancho, finMesa];
-      const uColumna = [uVerdulero[0] - 0.4, uVerdulero[0]];
+      const columna = 0.35; // interior de 31.4 cm: entran platos de 27 cm
+      // C2 deja un especiero de 25 cm en la esquina y C1 cierra la C sobre el pilar del
+      // extremo de la mesa; entre ambas, 60 cm para el microondas (6 cm de ventilación por lado).
+      const uC2 = [0.65, 0.65 + columna];
+      const uC1 = [finMesa - columna, finMesa];
+      const repisasColumna = [0.18, 0.264, ...REPISAS_V2]; // la repisa a 1.40 m divide las puertas
       const paredTres = (m) => m.pared === 'pared3' && m.tipo !== 'relleno';
+      // Fondo total de 35 cm con la puerta; el relleno de esquina arranca en el frente de A1.
+      const altos = { ...R.altos, y0: 1.4, y1: 2.2, fondo: 0.35 - esp };
+      const verdulero = { ancho: 0.4, fondo: 0.27, alto: 1.0 };
+      const xVerdulero = 1.15; // fuera del giro de la puerta de la refrigeradora (69 cm desde su bisagra)
+      // Electrodomésticos en las mesas de la Pared 2 (junto a sus tomacorrientes, uno a cada
+      // lado de la estufa) y de la Pared 3; la Pared 1 sigue con sus secadores.
+      const toma = { ancho: 0.12, y: [1.12, 1.19] }; // [E] altura por confirmar en obra
+      const separacionPared = 0.05; // freidora y arrocera
+      const contenidos = {
+        B2: 'Moldes, bandejas y artículos grandes (40 cm libres abajo)',
+        B4: 'Ollas, sartenes y tapas (junto a la estufa)',
+        B6: 'Fuentes, tapers y reservas',
+      };
       return {
         ...R,
-        altos: { ...R.altos, y0: 1.4 },
+        altos,
         modulos: [
           ...R.modulos
-            .filter((m) => m.id !== 'A2' && !paredTres(m))
-            .map((m) => (m.tipo === 'alto' && m.y0 === undefined && m.repisas === 2 ? { ...m, repisas: REPISAS_V2 } : m)),
+            .filter((m) => m.id !== 'A2' && (!paredTres(m) || m.tipo === 'bajo'))
+            .map((m) => {
+              if (m.id === 'R2') return { ...m, u: [altos.fondo + esp, m.u[1]] };
+              if (contenidos[m.id]) return { ...m, contenido: contenidos[m.id] };
+              return m.tipo === 'alto' && m.y0 === undefined && m.repisas === 2 ? { ...m, repisas: REPISAS_V2 } : m;
+            }),
           {
             id: 'A5',
             tipo: 'alto',
             pared: 'pared3',
-            u: [0.4, uColumna[0]],
+            u: [R.modulos.find((m) => m.id === 'R2').u[1], uC2[0]],
+            repisas: 3,
+            puertas: 1,
+            bisagra: 'inicio',
+            espalda: 'melamina',
+            contenido: 'Especiero sobre el microondas: condimentos, aceites y frascos',
+          },
+          {
+            id: 'C2',
+            tipo: 'alto',
+            pared: 'pared3',
+            u: uC2,
+            y0: mesa.alto,
+            hastaMesa: true,
+            repisas: repisasColumna,
+            // Abajo abre hacia la freidora (lejos del microondas); arriba, hacia el especiero,
+            // para no chocar con la hoja vecina de A6.
+            tramosPuertas: [
+              { hasta: altos.y0, puertas: 1, bisagra: 'fin' },
+              { puertas: 1, bisagra: 'inicio' },
+            ],
+            espalda: 'melamina',
+            contenido: 'Uso diario, hasta la mesa: tazas, vasos y bowls; arriba jarras y vasos de reserva',
+          },
+          {
+            id: 'A6',
+            tipo: 'alto',
+            pared: 'pared3',
+            u: [uC2[1], uC1[0]],
             repisas: REPISAS_V2,
             puertas: 2,
             espalda: 'melamina',
@@ -275,65 +322,101 @@ export const VERSIONES = {
             id: 'C1',
             tipo: 'alto',
             pared: 'pared3',
-            u: uColumna,
+            u: uC1,
             y0: mesa.alto,
             hastaMesa: true,
-            // Abajo: cubiertos y tazas (18 cm) y platos (26 cm); la repisa a 1.40 m divide las puertas.
-            repisas: [0.18, 0.264, ...REPISAS_V2],
-            // La puerta baja abre hacia A5 para no chocar con el verdulero; la alta, hacia A6,
-            // para no chocar con la hoja vecina de A5.
+            repisas: repisasColumna,
             tramosPuertas: [
-              { hasta: 1.4, puertas: 1, bisagra: 'inicio' },
+              { hasta: altos.y0, puertas: 1, bisagra: 'fin' },
               { puertas: 1, bisagra: 'fin' },
             ],
             espalda: 'melamina',
-            contenido: 'Uso diario, hasta la mesa: cubiertos y tazas, platos, vasos; sostiene A5 y A6',
-          },
-          {
-            id: 'A6',
-            tipo: 'alto',
-            pared: 'pared3',
-            u: uVerdulero,
-            repisas: REPISAS_V2,
-            puertas: 1,
-            bisagra: 'fin',
-            espalda: 'melamina',
-            contenido: 'Sobre el verdulero: artículos de poco uso',
-          },
-          { id: 'B2', tipo: 'bajo', pared: 'pared3', u: [0.6, 1.075], repisas: [0.4], contenido: 'Ollas y sartenes (40 cm libres abajo)' },
-          { id: 'B3', tipo: 'bajo', pared: 'pared3', u: [1.075, uVerdulero[0]], repisas: 2, contenido: 'Tapers y recipientes' },
-        ],
-        // La Pared 3 (ladrillo de soga sin tarrajeo, borde superior libre) solo mantiene
-        // los altos verticales: C1 y P1 bajan el peso a la mesa y el techo de losa toma el vuelco.
-        apoyos: [
-          {
-            id: 'P1',
-            tipo: 'panel',
-            pared: 'pared3',
-            u: [finMesa - esp, finMesa],
-            d: [0, R.altos.fondo + esp],
-            contenido: 'Pie de melamina bajo el extremo de A6, sobre el pilar de la mesa (queda detrás del verdulero)',
-          },
-        ],
-        zonasLibres: [
-          ...R.zonasLibres,
-          {
-            id: 'verdulero',
-            pared: 'pared3',
-            u: [uVerdulero[0], mesa.izquierda.largoPared3 - mesa.retiroPilar - mesa.espesorPilar],
-            contenido: 'libre (detrás del verdulero)',
+            contenido: 'Uso diario, hasta la mesa: cubiertos y platos; arriba platos hondos y fuentes',
           },
         ],
         equipos: [
-          ...R.equipos,
+          ...R.equipos.map((q) => {
+            // Entre las columnas: 48 cm en un hueco de 60 y 22 cm libres hasta A6.
+            if (q.id === 'microondas') return { ...q, u: [uC2[1] + 0.06, uC1[0] - 0.06] };
+            // Esquina de la L, en fila con la arrocera a 5 cm de la Pared 2 (bajo A1).
+            if (q.id === 'freidora')
+              return { ...q, pared: 'pared2', u: [0.25, 0.57], d: [separacionPared, separacionPared + 0.35] };
+            return q;
+          }),
+          {
+            id: 'arrocera',
+            nombre: 'Arrocera',
+            pared: 'pared2',
+            // Junto a la estufa, a 5 cm de la Pared 2 (bajo A1).
+            u: [0.62, 0.9],
+            d: [separacionPared, separacionPared + 0.28],
+            y: [mesa.alto, mesa.alto + 0.29], // [E] 1.8 L: 28 × 28 × 29 cm
+            grupo: 'izquierda',
+          },
+          {
+            id: 'licuadora',
+            nombre: 'Licuadora',
+            pared: 'pared2',
+            // Mesa derecha de la Pared 2, delante del tomacorriente.
+            u: [2.23, 2.43],
+            d: [0.06, 0.28],
+            y: [mesa.alto, mesa.alto + 0.38], // [E] con jarra de 1.5 L: 20 × 22 × 38 cm
+            grupo: 'derecha',
+          },
+          {
+            id: 'extractor',
+            nombre: 'Extractor',
+            pared: 'pared2',
+            u: [2.47, 2.69],
+            d: [0.04, 0.37],
+            y: [mesa.alto, mesa.alto + 0.4], // [E] centrífugo: 22 × 33 × 40 cm
+            grupo: 'derecha',
+          },
+          {
+            id: 'tomaIzquierda',
+            nombre: 'Toma doble',
+            pared: 'pared2',
+            u: [mesa.izquierda.largoPared2 - 0.03 - toma.ancho, mesa.izquierda.largoPared2 - 0.03],
+            d: [0, 0.01],
+            y: toma.y,
+            grupo: 'izquierda',
+          },
+          {
+            id: 'tomaDerecha',
+            nombre: 'Toma doble',
+            pared: 'pared2',
+            u: [DIM.ambiente.ancho - mesa.derecha.largoPared2 + 0.28, DIM.ambiente.ancho - mesa.derecha.largoPared2 + 0.28 + toma.ancho],
+            d: [0, 0.01],
+            y: toma.y,
+            grupo: 'derecha',
+          },
+          // Existentes en la Pared 1, sobre la extensión de acero del lavadero (no se mueven).
+          {
+            id: 'secadorAbierto',
+            nombre: 'Secador abierto',
+            pared: 'pared1',
+            u: [1.57, 2.07],
+            d: [0.06, 0.4],
+            y: [mesa.alto, mesa.alto + 0.22], // [E] 50 × 34 × 22 cm
+            grupo: 'derecha',
+          },
+          {
+            id: 'secadorCerrado',
+            nombre: 'Secador cerrado',
+            pared: 'pared1',
+            u: [2.1, 2.62],
+            d: [0.06, 0.42],
+            y: [mesa.alto, mesa.alto + 0.32], // [E] 52 × 36 × 32 cm, con tapa
+            grupo: 'derecha',
+          },
           {
             id: 'verdulero',
             nombre: 'Verdulero',
-            pared: 'pared3',
-            u: uVerdulero,
-            d: [mesa.fondo + 0.01, mesa.fondo + 0.01 + verdulero.fondo],
+            pared: 'pared4',
+            u: [xVerdulero, xVerdulero + verdulero.ancho],
+            d: [0, verdulero.fondo],
             y: [0, verdulero.alto],
-            grupo: 'izquierda',
+            grupo: 'verdulero',
           },
         ],
         montaje: 'desmontable',
@@ -478,6 +561,7 @@ export function cajaMundo(pared, [u0, u1], [d0, d1], [y0, y1], d = DIM) {
   if (pared === 'pared2') return { min: [u0, y0, d0], max: [u1, y1, d1] };
   if (pared === 'pared3') return { min: [d0, y0, u0], max: [d1, y1, u1] };
   if (pared === 'pared1') return { min: [A - d1, y0, u0], max: [A - d0, y1, u1] };
+  if (pared === 'pared4') return { min: [u0, y0, d.ambiente.fondo - d1], max: [u1, y1, d.ambiente.fondo - d0] };
   throw new Error(`Pared sin soporte para reposteros: ${pared}`);
 }
 
@@ -533,7 +617,21 @@ export function validarReposteros(R = REPOSTEROS, d = DIM) {
 
   const equipos = R.equipos.filter((q) => !q.cilindro).map((q) => ({ q, ...cajaMundo(q.pared, q.u, q.d, q.y, d) }));
   for (const c of cajas)
-    for (const { q, ...b } of equipos) if (seCruzan(c, b)) avisos.push(`El módulo ${c.m.id} choca con ${q.nombre.toLowerCase()}.`);
+    for (const { q, ...b } of equipos)
+      if (q.dentro !== c.m.id && seCruzan(c, b)) avisos.push(`El módulo ${c.m.id} choca con ${q.nombre.toLowerCase()}.`);
+  for (const q of R.equipos.filter((x) => x.dentro)) {
+    const m = mods.find((x) => x.id === q.dentro);
+    const techo = [...m.repisas, m.y1 - e()].find((y) => y > q.y[0]);
+    const cabe =
+      m.pared === q.pared &&
+      q.u[0] >= m.u0 + e() - 1e-6 &&
+      q.u[1] <= m.u1 - e() + 1e-6 &&
+      q.d[0] >= m.d0 + m.espEspalda - 1e-6 &&
+      q.d[1] <= m.d1 + 1e-6 &&
+      q.y[0] >= m.y0 + e() - 1e-6 &&
+      q.y[1] <= techo + 1e-6;
+    if (!cabe) avisos.push(`${q.nombre} no cabe en el módulo ${m.id}.`);
+  }
   for (const a of resolverApoyos(R, d)) {
     if (a.u1 > (largoMesa[a.pared] ?? 0) + 1e-6 || a.d1 > d.mesas.fondo)
       avisos.push(`El apoyo ${a.id} queda fuera de la mesa.`);

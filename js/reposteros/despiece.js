@@ -4,8 +4,14 @@
  * la página de planos).
  */
 import { REPOSTEROS, resolverModulos, resolverApoyos, cajaMundo } from '../config/reposteros.js';
+import { DIM } from '../config/dimensiones.js';
 
 const mm = (m) => Math.round(m * 1000);
+
+/** Largo comercial de la platina que amarra los altos al techo: luz hasta la losa + 5 cm de fijación, en múltiplos de 5 cm. */
+export function largoPlatina(R = REPOSTEROS) {
+  return Math.ceil(((DIM.ambiente.alto - R.altos.y1) * 100 + 5) / 5 - 1e-6) * 5;
+}
 
 /** Piezas de un módulo. Medidas en metros; `cantos` en metros lineales por pieza. */
 function piezasModulo(m, R) {
@@ -110,7 +116,7 @@ export function despiece(R = REPOSTEROS, modulos = resolverModulos(R)) {
           { id: 'pernoUnion', cant: 2 * contactosAltos(modulos), nota: '2 por cada unión entre altos o rellenos (sin cola)' },
         ]
       : []),
-    { id: 'escuadra', cant: altosVistos.length * 2, nota: '2 por módulo alto de la Pared 3, fijadas al techo' },
+    { id: 'escuadra', cant: altosVistos.length * 2, nota: `De ${largoPlatina(R)} cm; 2 por módulo alto de la Pared 3, fijadas al techo` },
     { id: 'tuboApoyo', cant: apoyos.filter((a) => a.tipo === 'tubo').length, nota: 'Apoyo de los altos de la Pared 3 sobre la mesa' },
     {
       id: 'regaton',

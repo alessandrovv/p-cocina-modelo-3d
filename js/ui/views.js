@@ -37,8 +37,9 @@ export function defineViews(d) {
       'bajosIzquierda',
       'altosPared3',
       'equiposIzquierda',
+      'verdulero',
     ]),
-    pared2: elev(new THREE.Vector3(A / 2, H / 2, 10), ['refrigeradora', 'altosPared3', 'bidon']),
+    pared2: elev(new THREE.Vector3(A / 2, H / 2, 10), ['refrigeradora', 'altosPared3', 'bidon', 'verdulero']),
     pared3: elev(new THREE.Vector3(10, H / 2, F / 2), [
       'mesaDerecha',
       'estufa',
@@ -46,6 +47,8 @@ export function defineViews(d) {
       'bajosDerecha',
       'tacho',
       'bidon',
+      'verdulero',
+      'equiposDerecha',
     ]),
     pared4: elev(new THREE.Vector3(A / 2, H / 2, -9), [
       'mesaIzquierda',

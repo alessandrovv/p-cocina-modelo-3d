@@ -92,7 +92,7 @@ export const PRECIOS = {
       estado: 'estimado',
     },
     escuadra: {
-      nombre: 'Platina o ángulo ranurado de 25 cm (amarre de altos de la Pared 3 al techo)',
+      nombre: 'Platina o ángulo ranurado (amarre de altos de la Pared 3 al techo)',
       unidad: 'unidad',
       precio: 5.0,
       estado: 'estimado',

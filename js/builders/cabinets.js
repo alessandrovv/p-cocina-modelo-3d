@@ -160,7 +160,7 @@ export function buildCabinets(d, M) {
   }
 
   // Equipos de referencia (volúmenes translúcidos, no se fabrican).
-  const equipos = { izquierda: new THREE.Group(), tacho: new THREE.Group(), bidon: new THREE.Group() };
+  const equipos = { izquierda: new THREE.Group(), tacho: new THREE.Group(), bidon: new THREE.Group(), verdulero: new THREE.Group(), derecha: new THREE.Group() };
   const equiposGroup = new THREE.Group();
   equiposGroup.name = 'equipos de referencia';
   for (const [k, g] of Object.entries(equipos)) {
@@ -170,25 +170,32 @@ export function buildCabinets(d, M) {
   for (const eq of REPOSTEROS.equipos) {
     const mesh = buildEquipo(eq, M);
     equipos[eq.grupo].add(mesh);
-    const top = new THREE.Box3().setFromObject(mesh);
-    const c = top.getCenter(new THREE.Vector3());
-    const lbl = etiqueta(eq.nombre, [c.x, top.max.y + 0.05, c.z], mesh);
-    lbl.element.classList.add('modulo-label--equipo');
-    etiquetas.add(lbl);
+    etiquetas.add(etiquetaEquipo(eq.nombre, mesh));
   }
 
   return { group, grupos, puertas, etiquetas, fantasmas, equipos, equiposGroup, modulos };
 }
 
+/** Nombre de un equipo sobre su cara superior; se muestra siempre que el objeto sea visible. */
+export function etiquetaEquipo(nombre, objeto) {
+  const top = new THREE.Box3().setFromObject(objeto);
+  const c = top.getCenter(new THREE.Vector3());
+  const lbl = etiqueta(nombre, [c.x, top.max.y + 0.05, c.z], objeto);
+  lbl.element.classList.add('modulo-label--equipo');
+  lbl.userData.siempre = true;
+  return lbl;
+}
+
 /**
  * Muestra un código solo si su módulo (y toda su cadena de padres) es visible
- * y su frente mira a la cámara (o se ve en planta).
+ * y su frente mira a la cámara (o se ve en planta). Los nombres de los equipos
+ * no dependen de las cotas.
  */
 export function updateCabinetLabels(etiquetas, visibles, camDir) {
   for (const lbl of etiquetas.children) {
     const n = lbl.userData.frente;
     let o = lbl.userData.modulo;
-    let ok = visibles && (!n || Math.abs(camDir.y) > 0.8 || camDir.dot(n) < -0.2);
+    let ok = (visibles || lbl.userData.siempre === true) && (!n || Math.abs(camDir.y) > 0.8 || camDir.dot(n) < -0.2);
     while (ok && o) {
       ok = o.visible;
       o = o.parent;

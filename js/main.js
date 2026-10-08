@@ -9,7 +9,7 @@ import { createMaterials } from './materials.js';
 import { buildRoom } from './builders/room.js';
 import { buildCounters } from './builders/counters.js';
 import { buildStove, buildFridge } from './builders/appliances.js';
-import { buildCabinets, updateCabinetLabels } from './builders/cabinets.js';
+import { buildCabinets, etiquetaEquipo, updateCabinetLabels } from './builders/cabinets.js';
 import {
   buildAnnotations,
   buildWallLabels,
@@ -79,6 +79,7 @@ const cotas = buildAnnotations(DIM);
 const nombres = buildWallLabels(DIM);
 const reposteros = buildCabinets(DIM, M);
 scene.add(room.group, mesas.group, estufa, refrigeradora, cotas, nombres);
+reposteros.etiquetas.add(etiquetaEquipo('Estufa', estufa), etiquetaEquipo('Refrigeradora', refrigeradora));
 scene.add(reposteros.group, reposteros.equiposGroup, reposteros.etiquetas);
 
 const rejilla = new THREE.Group();
@@ -126,6 +127,8 @@ const views = new ViewManager({
     equiposIzquierda: reposteros.equipos.izquierda,
     tacho: reposteros.equipos.tacho,
     bidon: reposteros.equipos.bidon,
+    verdulero: reposteros.equipos.verdulero,
+    equiposDerecha: reposteros.equipos.derecha,
   },
 });
 views.set('iso', { animate: false });

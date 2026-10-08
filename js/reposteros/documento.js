@@ -14,7 +14,7 @@ import {
   validarReposteros,
 } from '../config/reposteros.js';
 import { PRECIOS } from '../config/precios.js';
-import { despiece, presupuesto, productoDePieza } from './despiece.js';
+import { despiece, largoPlatina, presupuesto, productoDePieza } from './despiece.js';
 
 const D = DIM;
 const der = derivadas(D);
@@ -328,6 +328,7 @@ function planta() {
   const caja = (pared, u0, u1, d0, d1) => {
     if (pared === 'pared2') return [u0, d0, u1 - u0, d1 - d0];
     if (pared === 'pared3') return [d0, u0, d1 - d0, u1 - u0];
+    if (pared === 'pared4') return [u0, F - d1, u1 - u0, d1 - d0];
     return [A - d1, u0, d1 - d0, u1 - u0];
   };
   const punto = (pared, u, dd) => (pared === 'pared2' ? [u, dd] : pared === 'pared3' ? [dd, u] : [A - dd, u]);
@@ -538,6 +539,9 @@ function init() {
   }
   document.getElementById('anclaje-cm').textContent = Math.round((D.pared3.altoMuro - REPOSTEROS.altos.y0) * 100);
   for (const el of document.querySelectorAll('#anclaje-desde, .anclaje-desde')) el.textContent = REPOSTEROS.altos.y0.toFixed(2);
+  for (const el of document.querySelectorAll('.platina-cm')) el.textContent = largoPlatina();
+  const verdulero = REPOSTEROS.equipos.find((q) => q.id === 'verdulero');
+  for (const el of document.querySelectorAll('.verdulero-x')) el.textContent = verdulero ? verdulero.u[0].toFixed(2) : '';
   for (const li of document.querySelectorAll('[data-modulo]'))
     li.hidden = !modulos.some((m) => m.id === li.dataset.modulo);
   for (const li of document.querySelectorAll('.notas [data-version]'))
