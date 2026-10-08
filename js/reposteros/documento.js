@@ -256,6 +256,8 @@ function moduloEnAlzado(m, P, h) {
   return out;
 }
 
+const instalacionNueva = (eq) => eq.tipo === 'canaleta' || eq.nueva === true;
+
 function equiposEnAlzado(id, P, h) {
   let out = '';
   for (const eq of REPOSTEROS.equipos) {
@@ -266,8 +268,13 @@ function equiposEnAlzado(id, P, h) {
     else continue;
     const a = Math.min(P.s(u0), P.s(u1)) * S;
     const b = Math.min(Math.max(P.s(u0), P.s(u1)), P.largo) * S;
-    out += rect(a, h - eq.y[1] * S, b - a, (eq.y[1] - eq.y[0]) * S, 'equipo');
-    out += text((a + b) / 2, h - eq.y[1] * S - 30, eq.nombre, 'tequipo');
+    out += rect(a, h - eq.y[1] * S, b - a, (eq.y[1] - eq.y[0]) * S, instalacionNueva(eq) ? 'canaleta' : 'equipo');
+    const ty = eq.y[1] - eq.y[0] >= 0.15 ? h - ((eq.y[0] + eq.y[1]) / 2) * S + 18 : h - eq.y[1] * S - 30;
+    if (!instalacionNueva(eq)) out += text((a + b) / 2, ty, eq.nombre, 'tequipo');
+    if (eq.rotulo) {
+      const yr = h - (REPOSTEROS.altos.y0 + (eq.tipo === 'canaleta' ? 0.24 : 0.08)) * S;
+      out += line((a + b) / 2, h - eq.y[1] * S, (a + b) / 2, yr, 'llamada') + text((a + b) / 2, yr - 10, eq.rotulo, 'trotulo');
+    }
   }
   return out;
 }
@@ -353,8 +360,8 @@ function planta() {
       continue;
     }
     const [x, z, w, hh] = caja(eq.pared, eq.u[0], eq.u[1], eq.d[0], eq.d[1]);
-    c += rect(x * S, z * S, w * S, hh * S, 'equipo');
-    c += text((x + w / 2) * S, (z + hh / 2) * S + 18, eq.nombre.split(' ')[0], 'tequipo');
+    c += rect(x * S, z * S, w * S, hh * S, instalacionNueva(eq) ? 'canaleta' : 'equipo');
+    if (!instalacionNueva(eq)) c += text((x + w / 2) * S, (z + hh / 2) * S + 18, eq.nombre.split(' ')[0], 'tequipo');
   }
   for (const a of apoyos) {
     const [x, z, w, hh] = caja(a.pared, a.u0, a.u1, a.d0, a.d1);
@@ -532,7 +539,7 @@ function init() {
   document.getElementById('version-nombre').textContent = ver.nombre;
   document.getElementById('version-desc').textContent = ver.descripcion;
   document.getElementById('volver').href = `index.html?v=${VERSION}`;
-  for (const b of document.querySelectorAll('[data-version]')) {
+  for (const b of document.querySelectorAll('.versiones [data-version]')) {
     const v = Number(b.dataset.version);
     b.classList.toggle('active', v === VERSION);
     b.addEventListener('click', () => v !== VERSION && cambiarVersion(v));

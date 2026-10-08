@@ -423,6 +423,87 @@ export const VERSIONES = {
       };
     },
   },
+  3: {
+    nombre: 'Versión 3',
+    descripcion:
+      'Como la versión 2, pero C2 se une al especiero en un alto (A5) sostenido por un tubo sobre la mesa; licuadora y extractor en la Pared 3, con extensión eléctrica en canaleta',
+    aplicar: (R) => {
+      const V2 = VERSIONES[2].aplicar(R);
+      const mesa = DIM.mesas;
+      const tubo = 0.0254;
+      const uA6 = V2.modulos.find((m) => m.id === 'A6').u;
+      const uR2 = V2.modulos.find((m) => m.id === 'R2').u;
+      // Canaleta bajo los altos, sobre la arrocera y la freidora (sus tapas llegan a 1.23 m).
+      const yCanal = [1.33, 1.35];
+      const fondoCanal = 0.012;
+      const tomaY = [1.26, 1.33];
+      const fondoToma = 0.035;
+      const col = DIM.columnas.pared2Pared3;
+      const tomaOrigen = V2.equipos.find((q) => q.id === 'tomaIzquierda');
+      const xSubida = (tomaOrigen.u[0] + tomaOrigen.u[1]) / 2;
+      const canaleta = (id, pared, u, d, y = yCanal) => ({ id, nombre: 'Canaleta', tipo: 'canaleta', pared, u, d, y, grupo: 'izquierda' });
+      const tomaNueva = (id, u) => ({
+        id,
+        nombre: 'Toma doble nueva',
+        tipo: 'toma',
+        nueva: true,
+        rotulo: 'Toma nueva',
+        pared: 'pared3',
+        u,
+        d: [0, fondoToma],
+        y: tomaY,
+        grupo: 'izquierda',
+      });
+      // Licuadora junto a la esquina: la canasta de la freidora sale hacia ella por encima
+      // de su fondo de 22 cm sin tocarla; el extractor (33 cm de fondo) va hacia el tubo.
+      const licuadora = [0.46, 0.66];
+      const extractor = [0.71, 0.93];
+      const microondas = V2.equipos.find((q) => q.id === 'microondas').u;
+      return {
+        ...V2,
+        modulos: [
+          ...V2.modulos.filter((m) => m.id !== 'A5' && m.id !== 'C2'),
+          {
+            id: 'A5',
+            tipo: 'alto',
+            pared: 'pared3',
+            u: [uR2[1], uA6[0]],
+            repisas: REPISAS_V2,
+            puertas: 2,
+            espalda: 'melamina',
+            contenido: 'Abajo tazas y vasos de uso diario; arriba condimentos y conservas',
+          },
+        ],
+        // Bajo la unión de A5 y A6, cerca del frente: deja libre la mesa para los equipos.
+        apoyos: [
+          {
+            id: 'T1',
+            tipo: 'tubo',
+            pared: 'pared3',
+            u: [uA6[0] - tubo / 2, uA6[0] + tubo / 2],
+            d: [V2.altos.fondo - 0.03 - tubo, V2.altos.fondo - 0.03],
+            contenido: 'Tubo de aluminio blanco de 1" bajo la unión de A5 y A6',
+          },
+        ],
+        equipos: [
+          ...V2.equipos.map((q) => {
+            if (q.id === 'licuadora') return { ...q, pared: 'pared3', u: licuadora, d: [0.05, 0.27], grupo: 'izquierda' };
+            if (q.id === 'extractor') return { ...q, pared: 'pared3', u: extractor, d: [0.05, 0.38], grupo: 'izquierda' };
+            return q;
+          }),
+          // Extensión del tomacorriente de la Pared 2 (detrás de la arrocera): sube a la
+          // canaleta, rodea la columna de la esquina y sigue por la Pared 3.
+          canaleta('canalSubida', 'pared2', [xSubida - 0.01, xSubida + 0.01], [0, fondoCanal], [tomaOrigen.y[1], yCanal[1]]),
+          { ...canaleta('canalPared2', 'pared2', [col.x, xSubida + 0.01], [0, fondoCanal]), rotulo: 'Canaleta nueva' },
+          canaleta('canalColumnaLado', 'pared3', [0, col.z + fondoCanal], [col.x, col.x + fondoCanal]),
+          canaleta('canalColumnaFrente', 'pared2', [0, col.x + fondoCanal], [col.z, col.z + fondoCanal]),
+          { ...canaleta('canalPared3', 'pared3', [col.z, microondas[0] + 0.24], [0, fondoCanal]), rotulo: 'Canaleta nueva' },
+          tomaNueva('tomaLicuadora', [(licuadora[1] + extractor[0]) / 2 - 0.06, (licuadora[1] + extractor[0]) / 2 + 0.06]),
+          tomaNueva('tomaMicroondas', [(microondas[0] + microondas[1]) / 2 - 0.06, (microondas[0] + microondas[1]) / 2 + 0.06]),
+        ],
+      };
+    },
+  },
 };
 
 const CLAVE_VERSION = 'cocina-version';

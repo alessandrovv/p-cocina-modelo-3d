@@ -235,5 +235,7 @@ export function createMaterials(renderer) {
       depthWrite: false,
     }),
     equipoArista: new THREE.LineBasicMaterial({ color: 0x1f5fa8, transparent: true, opacity: 0.8 }),
+    instalacion: new THREE.MeshStandardMaterial({ color: 0xe0301e, emissive: 0x8a1a10, roughness: 0.5 }),
+    instalacionLinea: new THREE.LineBasicMaterial({ color: 0x8e1b10 }),
   };
 }

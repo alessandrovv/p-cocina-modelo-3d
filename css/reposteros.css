@@ -369,6 +369,25 @@ figcaption {
 .plano .apoyo-tubo {
   fill: #9aa3ad;
 }
+.plano .canaleta {
+  fill: #fff;
+  stroke: #c0392b;
+  stroke-width: 5;
+}
+.plano .llamada {
+  stroke: #c0392b;
+  stroke-width: 4;
+}
+.plano .trotulo {
+  font-size: 40px;
+  font-weight: 700;
+  fill: #c0392b;
+  text-anchor: middle;
+  paint-order: stroke;
+  stroke: #fff;
+  stroke-width: 14px;
+  stroke-linejoin: round;
+}
 .plano .tapoyo {
   font-size: 40px;
   font-weight: 700;

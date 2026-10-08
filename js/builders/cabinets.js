@@ -86,7 +86,13 @@ function buildEquipo(eq, M) {
     mesh.position.set(x, eq.y[0] + h / 2, z);
   } else {
     const { min, max } = cajaMundo(eq.pared, eq.u, eq.d, eq.y);
-    mesh = boxBetween(min, max, M.equipo, { worldUV: false });
+    const instalado = eq.tipo === 'canaleta' || eq.tipo === 'toma';
+    mesh = boxBetween(min, max, eq.tipo === 'canaleta' || eq.nueva ? M.instalacion : instalado ? M.melamina : M.equipo, { worldUV: false });
+    if (instalado) {
+      mesh.name = eq.nombre;
+      if (mesh.material === M.instalacion) mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry), M.instalacionLinea));
+      return mesh;
+    }
   }
   mesh.name = eq.nombre;
   mesh.renderOrder = 2;
@@ -170,10 +176,35 @@ export function buildCabinets(d, M) {
   for (const eq of REPOSTEROS.equipos) {
     const mesh = buildEquipo(eq, M);
     equipos[eq.grupo].add(mesh);
-    etiquetas.add(etiquetaEquipo(eq.nombre, mesh));
+    if (eq.rotulo) {
+      const { linea, rotulo } = llamada(eq, mesh, d, M);
+      equipos[eq.grupo].add(linea);
+      etiquetas.add(rotulo);
+    } else if (eq.tipo !== 'canaleta') etiquetas.add(etiquetaEquipo(eq.nombre, mesh));
   }
 
   return { group, grupos, puertas, etiquetas, fantasmas, equipos, equiposGroup, modulos };
+}
+
+/**
+ * Rótulo de una instalación nueva: sale hacia el frente por debajo de los altos
+ * y sube hasta sus puertas, lejos de los nombres de los equipos de la mesa.
+ */
+function llamada(eq, mesh, d, M) {
+  const uc = (eq.u[0] + eq.u[1]) / 2;
+  const yc = (eq.y[0] + eq.y[1]) / 2;
+  const frente = REPOSTEROS.altos.fondo + REPOSTEROS.material.espesor + 0.03;
+  const yRotulo = REPOSTEROS.altos.y0 + (eq.tipo === 'canaleta' ? 0.24 : 0.08);
+  const punto = (dd, y) => new THREE.Vector3(...cajaMundo(eq.pared, [uc, uc], [dd, dd], [y, y], d).min);
+  const linea = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([punto(eq.d[1], yc), punto(frente, yc), punto(frente, yRotulo)]),
+    M.instalacionLinea,
+  );
+  const rotulo = etiqueta(eq.rotulo, punto(frente, yRotulo).toArray(), mesh, eq.pared);
+  rotulo.element.classList.add('modulo-label--instalacion');
+  rotulo.userData.siempre = true;
+  rotulo.userData.ambosLados = true;
+  return { linea, rotulo };
 }
 
 /** Nombre de un equipo sobre su cara superior; se muestra siempre que el objeto sea visible. */
@@ -189,13 +220,14 @@ export function etiquetaEquipo(nombre, objeto) {
 /**
  * Muestra un código solo si su módulo (y toda su cadena de padres) es visible
  * y su frente mira a la cámara (o se ve en planta). Los nombres de los equipos
- * no dependen de las cotas.
+ * no dependen de las cotas; los rótulos de instalaciones solo se ocultan de canto.
  */
 export function updateCabinetLabels(etiquetas, visibles, camDir) {
   for (const lbl of etiquetas.children) {
     const n = lbl.userData.frente;
     let o = lbl.userData.modulo;
-    let ok = (visibles || lbl.userData.siempre === true) && (!n || Math.abs(camDir.y) > 0.8 || camDir.dot(n) < -0.2);
+    const encara = n && (lbl.userData.ambosLados ? Math.abs(camDir.dot(n)) > 0.2 : camDir.dot(n) < -0.2);
+    let ok = (visibles || lbl.userData.siempre === true) && (!n || Math.abs(camDir.y) > 0.8 || encara);
     while (ok && o) {
       ok = o.visible;
       o = o.parent;

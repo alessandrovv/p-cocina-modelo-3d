@@ -94,6 +94,22 @@ function contactosAltos(modulos) {
   return n;
 }
 
+/** Extensión eléctrica en canaleta: tramos (equipos tipo 'canaleta') y tomacorrientes nuevos. */
+function herrajesElectricos(R) {
+  const tramos = R.equipos.filter((q) => q.tipo === 'canaleta');
+  if (!tramos.length) return [];
+  // Cada tramo corre a lo largo de su mayor dimensión.
+  const largo = tramos.reduce((s, q) => s + Math.max(q.u[1] - q.u[0], q.y[1] - q.y[0], q.d[1] - q.d[0]), 0);
+  const tomas = R.equipos.filter((q) => q.tipo === 'toma' && q.nueva).length;
+  const cm = Math.round(largo * 100);
+  return [
+    { id: 'canaleta', cant: Math.ceil((largo * 1.1) / 2), nota: `${cm} cm de recorrido + 10 % de merma` },
+    { id: 'accesorioCanaleta', cant: tramos.length + tomas, nota: 'Ángulos en cada cambio de dirección y tapas finales' },
+    { id: 'cable', cant: Math.ceil(largo * 1.15 * 3), nota: '3 conductores (fase, neutro y tierra) + 15 % para conexiones' },
+    { id: 'tomaAdosable', cant: tomas, nota: 'Nuevos, en la canaleta de la Pared 3' },
+  ];
+}
+
 export function despiece(R = REPOSTEROS, modulos = resolverModulos(R)) {
   const apoyos = resolverApoyos(R);
   const piezas = agrupar([...modulos.flatMap((m) => piezasModulo(m, R)), ...apoyos.flatMap(piezasApoyo)]);
@@ -124,6 +140,7 @@ export function despiece(R = REPOSTEROS, modulos = resolverModulos(R)) {
       nota: altos.some((m) => m.hastaMesa) ? '4 por módulo bajo y 4 de goma bajo la columna que apoya en la mesa' : '4 por módulo bajo',
     },
     { id: 'tornilleria', cant: 1, nota: 'Tornillos 4 × 40 / 4 × 50 mm, tarugos 8 mm, clavos de fondo' },
+    ...herrajesElectricos(R),
   ].filter((h) => h.cant > 0);
 
   const total = (k) => piezas.reduce((s, p) => s + p[k] * p.cant, 0);
@@ -331,6 +348,7 @@ export function presupuesto(d, precios, opciones) {
   for (const h of d.herrajes) add(h.id, h.cant, 'herrajes', h.nota);
   add('movilidad', 1, 'servicios');
   if (opciones.manoObra) add('manoObra', 1, 'mano de obra');
+  if (opciones.manoObra && d.herrajes.some((h) => h.id === 'canaleta')) add('manoObraElectrica', 1, 'mano de obra');
 
   const suma = (f) => lineas.filter(f).reduce((s, l) => s + l.total, 0);
   return {

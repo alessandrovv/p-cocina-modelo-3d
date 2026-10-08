@@ -109,6 +109,36 @@ export const PRECIOS = {
       precio: 40,
       estado: 'estimado',
     },
+    canaleta: {
+      nombre: 'Canaleta adosable blanca 20 × 12 mm con adhesivo, barra de 2 m',
+      unidad: 'barra',
+      precio: 6.5,
+      estado: 'estimado',
+    },
+    accesorioCanaleta: {
+      nombre: 'Accesorio de canaleta (ángulo interior/exterior, tapa final)',
+      unidad: 'unidad',
+      precio: 2.0,
+      estado: 'estimado',
+    },
+    cable: {
+      nombre: 'Cable THW-90 2.5 mm² (fase, neutro y tierra)',
+      unidad: 'm',
+      precio: 2.2,
+      estado: 'estimado',
+    },
+    tomaAdosable: {
+      nombre: 'Tomacorriente doble con tierra, adosable (con caja)',
+      unidad: 'unidad',
+      precio: 18,
+      estado: 'estimado',
+    },
+    manoObraElectrica: {
+      nombre: 'Mano de obra: extensión eléctrica (electricista)',
+      unidad: 'global',
+      precio: 80,
+      estado: 'estimado',
+    },
     movilidad: {
       nombre: 'Movilidad de las piezas cortadas',
       unidad: 'global',

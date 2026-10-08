@@ -217,6 +217,11 @@ button[aria-pressed='true'] {
   background: #1f5fa8;
 }
 
+.modulo-label--instalacion {
+  background: #c0392b;
+  outline: 2px solid #fff;
+}
+
 @media (max-width: 760px) {
   .brand,
   .hint {
