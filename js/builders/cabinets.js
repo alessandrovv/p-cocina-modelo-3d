@@ -147,8 +147,10 @@ export function buildCabinets(d, M) {
   }
   for (const a of resolverApoyos(REPOSTEROS, d)) {
     const mat = a.tipo === 'tubo' ? M.acero : M.melamina;
-    const mesh = panel(a, [a.u0, a.u1], [a.d0, a.d1], [a.y0, a.y1], mat, `apoyo ${a.id}`, d);
-    (cuerpo[a.pared] ?? group).add(mesh);
+    const destinoApoyo = cuerpo[a.pared] ?? group;
+    destinoApoyo.add(panel(a, [a.u0, a.u1], [a.d0, a.d1], [a.y0, a.y1], mat, `apoyo ${a.id}`, d));
+    for (const [nombre, p] of Object.entries(a.placas ?? {}))
+      destinoApoyo.add(panel(a, [p.u0, p.u1], [p.d0, p.d1], [p.y0, p.y1], nombre === 'goma' ? M.negroMate : M.acero, `${nombre} ${a.id}`, d));
   }
   setShadows(group);
 

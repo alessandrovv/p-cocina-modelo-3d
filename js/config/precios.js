@@ -91,6 +91,12 @@ export const PRECIOS = {
       precio: 35,
       estado: 'estimado',
     },
+    pataReforzada: {
+      nombre: 'Pata de tubo cuadrado de aluminio 1½" × 50 cm, placa superior de 10 × 10 cm y base de 8 × 8 cm con tope de goma',
+      unidad: 'unidad',
+      precio: 60,
+      estado: 'estimado',
+    },
     escuadra: {
       nombre: 'Platina o ángulo ranurado (amarre de altos de la Pared 3 al techo)',
       unidad: 'unidad',

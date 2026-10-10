@@ -14,7 +14,7 @@ Sitio estático (HTML + CSS + JavaScript con módulos ES nativos) con dos págin
 Contexto del usuario (útil para decisiones de diseño):
 
 - **Etapa 1:** modelar la cocina tal como está, a partir de dibujos a mano y fotos (`images/`).
-- **Etapa 2:** diseñar reposteros de melamina blanca de 18 mm: altos con puertas en las Paredes 2 y 3, bajos **abiertos** (sin puertas ni cajones) bajo las mesas de cerámica.
+- **Etapa 2:** diseñar reposteros de melamina blanca de 18 mm: altos con puertas en las Paredes 2 y 3, bajos **abiertos** (sin puertas ni cajones) bajo las mesas de cerámica. Desde la versión 4 los bajos llevan puertas (salvo el esquinero B5).
 - Quien usará los altos mide 1.50 m (de ahí la versión 2, con los altos más bajos).
 - Precios en soles (S/), tiendas peruanas (Sodimac, Promart).
 - Todo el contenido visible, los identificadores y los comentarios están **en español**. Mantenlo así.
@@ -37,7 +37,7 @@ cd cocina && python3 -m http.server 8000
 
 Parámetros y estado del navegador:
 
-- `?v=1` / `?v=2` elige la versión del diseño; se guarda en `localStorage['cocina-version']`. Sin parámetro ni valor guardado se usa la última versión definida.
+- `?v=N` elige la versión del diseño. Sin parámetro se usa `VERSION_POR_DEFECTO` (en `reposteros.js`). No se guarda en el navegador: los enlaces entre páginas llevan `?v=`.
 - `localStorage['cocina-reposteros-precios']` guarda los precios editados en el presupuesto. Solo se aplican si su `fecha` coincide con `PRECIOS.fecha`.
 
 Ganchos de depuración en la consola del navegador:
@@ -154,6 +154,10 @@ Cada entrada de `BASE.modulos`:
 
 Otras listas de `BASE`: `zonasLibres` (bajo el lavadero), `equipos` (volúmenes de referencia que **no se fabrican**; cajas en coordenadas de pared o `cilindro` en coordenadas de mundo).
 
+- Un equipo con `dentro: 'B3'` está guardado en ese módulo: no cuenta como choque y se valida que quepa en su tramo.
+- `tipo: 'canaleta'` y `nueva: true` marcan instalaciones nuevas, que se dibujan en rojo. `rotulo` agrega en el 3D y en los alzados un rótulo con línea guía.
+- Los `apoyos` (versión 3 en adelante) pueden llevar `placas: { superior, base, espesor, goma }`. `resolverApoyos()` las convierte en cajas que usan el 3D, los planos y la validación.
+
 Las versiones posteriores (`VERSIONES[n].aplicar(R)`) devuelven un objeto nuevo sin mutar `BASE`. La versión 2, por ejemplo, baja `altos.y0` a 1.40, elimina A2, cambia las repisas, agrega `apoyos` (P1 panel, T1 tubo) y `montaje: 'desmontable'` (que activa el riel y los pernos en los herrajes).
 
 La versión se resuelve **una sola vez al cargar el módulo**; `cambiarVersion(v)` recarga la página con `?v=v`. No intentes cambiar de versión en caliente.
@@ -172,7 +176,7 @@ La versión se resuelve **una sola vez al cargar el módulo**; `cambiarVersion(v
 1. Agregar `VERSIONES[n]` con `nombre`, `descripcion` y `aplicar`.
 2. Agregar el botón `data-version="n"` en **ambos** HTML (`index.html` y `reposteros.html`).
 3. Para notas exclusivas de una versión en `reposteros.html`, usar `data-version="n"` (admite varios valores separados por espacio).
-4. Recuerda que la versión por defecto pasa a ser la nueva (`ULTIMA`).
+4. La versión por defecto es `VERSION_POR_DEFECTO`: cámbiala solo si el usuario lo pide.
 
 **Agregar una vista de cámara:**
 

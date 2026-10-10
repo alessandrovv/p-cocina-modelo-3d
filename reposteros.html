@@ -11,7 +11,7 @@
     <header class="cabecera">
       <div>
         <h1>Reposteros de cocina · <span id="version-nombre"></span></h1>
-        <p>Melamina blanca de 18 mm · altos con puertas en las Paredes 2 y 3 · bajos abiertos bajo las mesas de cerámica</p>
+        <p>Melamina blanca de 18 mm · altos con puertas en las Paredes 2 y 3 · bajos bajo las mesas de cerámica (abiertos hasta la versión 3)</p>
         <p class="version-desc" id="version-desc"></p>
       </div>
       <nav class="acciones">
@@ -19,6 +19,7 @@
           <button type="button" data-version="1">V1</button>
           <button type="button" data-version="2">V2</button>
           <button type="button" data-version="3">V3</button>
+          <button type="button" data-version="4">V4</button>
         </span>
         <a href="index.html" id="volver">← Modelo 3D</a>
         <button type="button" id="imprimir">Imprimir</button>
@@ -96,11 +97,26 @@
           <li data-version="2"><b>Montaje desmontable.</b> Los altos cuelgan de un riel metálico con colgadores regulables: para retirarlos se aflojan los colgadores y se levanta el mueble entero. Los módulos se unen entre sí con pernos (sin cola) y nada se pega ni se sella con silicona a la pared o a la cerámica; los bajos solo se apoyan sobre regatones. Nada se fija a la columna de la esquina de las Paredes 2 y 3: para rehacerla basta retirar A1, R2, A5 y B1 y sacar el microondas. Si la columna se engrosa, A1 se acorta por el tramo de la tapa fija. Conviene armar los cuerpos con uniones desarmables (minifix) en lugar de confirmat.</li>
           <li><b>Esquina de las Paredes 2 y 3.</b> A1 tiene una tapa fija en el tramo que queda detrás de A5; el relleno R2 separa ambos módulos para que las puertas abran sin chocar.</li>
           <li data-modulo="A2"><b>Sobre la estufa (A2).</b> Empieza a 1.70 m (80 cm sobre la mesa) porque no hay campana. No guardes ahí plásticos ni productos que se dañen con el calor.</li>
-          <li><b>Bajos abiertos.</b> Se apoyan sobre el zócalo de cerámica con regatones, a 3 cm de la pared y 4 cm por detrás del canto de la mesa. No se atornillan a la cerámica.</li>
+          <li data-version="1 2 3"><b>Bajos abiertos.</b> Se apoyan sobre el zócalo de cerámica con regatones, a 3 cm de la pared y 4 cm por detrás del canto de la mesa. No se atornillan a la cerámica.</li>
+          <li data-version="4"><b>Bajos con puertas.</b> Se apoyan sobre el zócalo de cerámica con regatones, a 3 cm de la pared, sin atornillarse a la cerámica. La puerta queda 2 cm por detrás del canto de la mesa y lleva el tirador arriba.
+            <ul>
+              <li><b>Bisagras:</b> en las puertas de una hoja (B1, B4 y B6) van del lado contrario al pilar de la mesa, para que la puerta abra sin rozarlo.</li>
+              <li><b>B1:</b> su frente queda detrás del lateral de B2 hasta 60 cm de la Pared 3. Ese tramo lleva una tapa fija y la puerta de 22 cm cubre el resto.</li>
+              <li><b>B5 queda abierto:</b> es el esquinero bajo la mesa de la Pared 1 y se llega a él por el espacio libre bajo el lavadero. Una puerta ahí estorbaría y no se vería.</li>
+              <li><b>Esquina de B1 y B2:</b> la hoja izquierda de B2 abre hasta unos 90° antes de tocar el tirador de B1. Si molesta, en B1 puede usarse un tirador de perfil.</li>
+            </ul>
+          </li>
+          <li data-version="4"><b>B3 y la llave de agua.</b> B3 tiene la misma distribución que B2: una sola repisa con 44 cm libres abajo, para llegar sin estorbos a la llave de agua de la Pared 3.
+            <ul>
+              <li>El fondo de MDF lleva un registro (abertura de unos 20 × 20 cm) frente a la llave, que se marca en obra antes de clavarlo.</li>
+              <li>El extractor de jugos se guarda en el tramo bajo, hacia el frente y a la izquierda, para que la llave quede a la mano.</li>
+              <li>B2 pasa también a 44 cm libres abajo, para que ambos sigan iguales y el extractor (40 cm de alto) entre con holgura.</li>
+            </ul>
+          </li>
           <li><b>Esquineros (A1, B1 y B5).</b> Tienen fondo de difícil acceso: úsalos para lo que se usa poco. A B5 se llega por el espacio libre bajo el lavadero.</li>
           <li><b>Bajo el lavadero.</b> Queda libre por las tuberías y la humedad; basta un organizador plástico para productos de limpieza.</li>
           <li data-version="2"><b>Columnas de uso diario (C1 y C2).</b> Bajan hasta la mesa para que lo de todos los días quede al alcance. Abajo tienen un tramo de 18 cm (cubiertos, tazas) y otro de 26 cm (platos, vasos, bowls); desde 1.40 m, lo de menos uso. Miden 35 cm de ancho, con 31 cm libres por dentro, así que entran platos de 27 cm. Las puertas bajas tienen el tirador arriba y abren hacia el centro de la mesa. Entre las columnas quedan 60 cm de mesa libre bajo A6 para la freidora y para servir.</li>
-          <li data-version="2 3"><b>Verdulero.</b> Va de pie contra la Pared 4, entre la refrigeradora y la entrada, a <span class="verdulero-x"></span> m de la Pared 3. Así queda fuera del giro de la puerta de la refrigeradora, no estorba el paso por la entrada y deja libre todo el extremo de la mesa. Con esto B3 vuelve a llegar hasta el pilar de la mesa.</li>
+          <li data-version="2 3 4"><b>Verdulero.</b> Va de pie contra la Pared 4, entre la refrigeradora y la entrada, a <span class="verdulero-x"></span> m de la Pared 3. Así queda fuera del giro de la puerta de la refrigeradora, no estorba el paso por la entrada y deja libre todo el extremo de la mesa. Con esto B3 vuelve a llegar hasta el pilar de la mesa.</li>
           <li data-version="2"><b>Electrodomésticos en las mesas de las Paredes 2 y 3.</b> La Pared 1 conserva sus dos secadores de platos sobre la extensión de acero del lavadero. Hay un tomacorriente doble a cada lado de la estufa.
             <ul>
               <li><b>Mesa derecha de la Pared 2:</b> la licuadora queda donde está hoy, junto al tomacorriente, y el extractor a su derecha.</li>
@@ -119,8 +135,23 @@
               <li>El muro solo sostiene el riel (tarugos de 8 mm en la franja de ladrillo de <span class="anclaje-desde"></span> a 1.85 m). Cada módulo se amarra a la losa del techo con dos platinas de <span class="platina-cm"></span> cm.</li>
             </ul>
           </li>
-          <li data-version="3"><b>Montaje desmontable.</b> Los altos cuelgan de un riel metálico con colgadores regulables: para retirarlos se aflojan los colgadores y se levanta el mueble entero. El tubo T1 se desatornilla de la base. Los módulos se unen entre sí con pernos (sin cola), y nada se pega ni se sella con silicona a la pared o a la cerámica. Para rehacer la columna de la esquina de las Paredes 2 y 3 basta retirar A1, R2, A5 y B1, despegar la canaleta adhesiva y despejar los equipos de la esquina. Conviene armar los cuerpos con uniones desarmables (minifix) en lugar de confirmat.</li>
-          <li data-version="3"><b>Columna de uso diario (C1).</b> Baja hasta la mesa para que lo de todos los días quede al alcance. Abajo tiene un tramo de 18 cm para cubiertos y otro de 26 cm para platos; desde 1.40 m, lo de menos uso. Las tazas y los vasos de diario van en la primera repisa de A5, a 1.42 m.</li>
+          <li data-version="4"><b>Pared 3 apoyada en la mesa: C1 y la pata T1.</b> El muro es de ladrillo de soga sin tarrajeo (12–13 cm) y tiene el borde superior libre, así que no debe cargar el peso.
+            <ul>
+              <li>La columna C1 baja hasta la mesa en el extremo, sobre el pilar.</li>
+              <li><b>Pata T1</b>, bajo la unión de A5 y A6, a 6 cm del frente de los altos:
+                <ul>
+                  <li>Tubo cuadrado de aluminio de 1½" (3.8 cm), más rígido que el de 1" de la versión 3.</li>
+                  <li>Arriba, una placa de 10 × 10 cm que abarca la unión y se atornilla a la base de A5 y de A6, con 2 tornillos en cada módulo. Así la pata también amarra ambos módulos entre sí.</li>
+                  <li>Abajo, una base de 8 × 8 cm con tope de goma que reparte la carga sobre la cerámica sin perforarla.</li>
+                </ul>
+              </li>
+              <li>A5 (antes especiero + C2) es un alto de 60 cm que se une a A1 a través del relleno R2.</li>
+              <li>Todo el conjunto se une con pernos y trabaja como una sola pieza.</li>
+              <li>El muro solo sostiene el riel (tarugos de 8 mm en la franja de ladrillo de <span class="anclaje-desde"></span> a 1.85 m). Cada módulo se amarra a la losa del techo con dos platinas de <span class="platina-cm"></span> cm.</li>
+            </ul>
+          </li>
+          <li data-version="3 4"><b>Montaje desmontable.</b> Los altos cuelgan de un riel metálico con colgadores regulables: para retirarlos se aflojan los colgadores y se levanta el mueble entero. La pata T1 se desatornilla de la base de los altos. Los módulos se unen entre sí con pernos (sin cola), y nada se pega ni se sella con silicona a la pared o a la cerámica. Para rehacer la columna de la esquina de las Paredes 2 y 3 basta retirar A1, R2, A5 y B1, despegar la canaleta adhesiva y despejar los equipos de la esquina. Conviene armar los cuerpos con uniones desarmables (minifix) en lugar de confirmat.</li>
+          <li data-version="3 4"><b>Columna de uso diario (C1).</b> Baja hasta la mesa para que lo de todos los días quede al alcance. Abajo tiene un tramo de 18 cm para cubiertos y otro de 26 cm para platos; desde 1.40 m, lo de menos uso. Las tazas y los vasos de diario van en la primera repisa de A5, a 1.42 m.</li>
           <li data-version="3"><b>Electrodomésticos.</b> La Pared 1 conserva sus dos secadores de platos.
             <ul>
               <li><b>Mesa izquierda, Pared 2:</b> la arrocera junto a la estufa y la freidora en la esquina, en fila y a 5 cm de la pared. Se conectan al tomacorriente doble de la izquierda de la estufa. Mientras funcionan, conviene adelantarlas hacia el canto de la mesa.</li>
@@ -129,10 +160,18 @@
               <li>La mesa derecha de la Pared 2 queda libre para picar.</li>
             </ul>
           </li>
-          <li data-version="3"><b>Extensión eléctrica en canaleta.</b>
+          <li data-version="4"><b>Electrodomésticos.</b> La Pared 1 conserva sus dos secadores de platos.
+            <ul>
+              <li><b>Mesa izquierda, Pared 2:</b> la arrocera junto a la estufa y la freidora en la esquina, en fila y a 5 cm de la pared. Se conectan al tomacorriente doble de la izquierda de la estufa. Mientras funcionan, conviene adelantarlas hacia el canto de la mesa.</li>
+              <li><b>Mesa derecha, Pared 2:</b> la licuadora, donde está hoy, junto al tomacorriente de la derecha de la estufa.</li>
+              <li><b>Extractor de jugos:</b> se guarda abajo en B3. Para usarlo, va a la mesa libre de la Pared 3, entre la freidora y la pata T1, que tiene un tomacorriente nuevo.</li>
+              <li><b>Entre T1 y C1:</b> el microondas, con 22 cm libres hasta A6.</li>
+            </ul>
+          </li>
+          <li data-version="3 4"><b>Extensión eléctrica en canaleta.</b>
             <ul>
               <li><b>Recorrido:</b> sale de la caja del tomacorriente doble de la izquierda de la estufa (detrás de la arrocera) y sube a 1.35 m, justo debajo de los altos y por encima de la arrocera y la freidora. Luego corre por la Pared 2 hasta la columna de la esquina, la rodea por sus dos caras y sigue por la Pared 3.</li>
-              <li><b>Tomacorrientes nuevos:</b> dos dobles adosables, uno entre la licuadora y el extractor y otro sobre el microondas.</li>
+              <li><b>Tomacorrientes nuevos:</b> dos dobles adosables, uno en la mesa de la Pared 3 entre la freidora y T1 y otro sobre el microondas.</li>
               <li><b>Materiales:</b> canaleta adhesiva de 20 × 12 mm, sin picar el muro de soga, con cable de 2.5 mm² y línea de tierra.</li>
               <li><b>En los planos:</b> la canaleta y los tomacorrientes nuevos van en rojo.</li>
               <li><b>Instalación:</b> la conexión debe hacerla un electricista, revisando antes que el circuito tenga capacidad para el microondas, la freidora y la arrocera a la vez. Si no la tiene, conviene no usarlos simultáneamente.</li>

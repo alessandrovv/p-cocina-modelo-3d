@@ -124,7 +124,13 @@ export function despiece(R = REPOSTEROS, modulos = resolverModulos(R)) {
 
   const herrajes = [
     { id: 'bisagra', cant: puertas, nota: '2 bisagras por puerta (1 paquete)' },
-    { id: 'tirador', cant: puertas, nota: '1 por puerta, vertical, cerca del borde inferior' },
+    {
+      id: 'tirador',
+      cant: puertas,
+      nota: bajos.some((m) => m.puertas.length)
+        ? '1 por puerta, vertical: abajo en los altos y arriba en los bajos'
+        : '1 por puerta, vertical, cerca del borde inferior',
+    },
     { id: 'colgador', cant: altos.length, nota: desmontable ? '1 par por módulo alto; se enganchan al riel' : '1 par por módulo alto' },
     ...(desmontable
       ? [
@@ -133,7 +139,12 @@ export function despiece(R = REPOSTEROS, modulos = resolverModulos(R)) {
         ]
       : []),
     { id: 'escuadra', cant: altosVistos.length * 2, nota: `De ${largoPlatina(R)} cm; 2 por módulo alto de la Pared 3, fijadas al techo` },
-    { id: 'tuboApoyo', cant: apoyos.filter((a) => a.tipo === 'tubo').length, nota: 'Apoyo de los altos de la Pared 3 sobre la mesa' },
+    { id: 'tuboApoyo', cant: apoyos.filter((a) => a.tipo === 'tubo' && !a.placas).length, nota: 'Apoyo de los altos de la Pared 3 sobre la mesa' },
+    {
+      id: 'pataReforzada',
+      cant: apoyos.filter((a) => a.tipo === 'tubo' && a.placas).length,
+      nota: 'Bajo la unión de A5 y A6: la placa superior se atornilla a ambos módulos (2 tornillos en cada uno)',
+    },
     {
       id: 'regaton',
       cant: (bajos.length + altos.filter((m) => m.hastaMesa).length) * 4,

@@ -222,7 +222,7 @@ function moduloEnAlzado(m, P, h) {
   if (m.tipo === 'relleno') return out;
   const esp = REPOSTEROS.material.espesor * S;
   // Interior de los bajos abiertos: laterales, piso, techo y repisas.
-  if (m.tipo === 'bajo') {
+  if (m.tipo === 'bajo' && !m.puertas.length) {
     out += rect(x0 + esp, y + esp, w - 2 * esp, alto - 2 * esp, 'mod-int');
     for (const yr of m.repisas) out += rect(x0 + esp, h - (yr + REPOSTEROS.material.espesor) * S, w - 2 * esp, esp, 'repisa');
   } else {
@@ -250,8 +250,10 @@ function moduloEnAlzado(m, P, h) {
     out += line(xt, ya, xt, ya - lt, 'tirador');
   }
   const cx = x0 + w / 2;
-  // En las columnas el código va en el tramo alto, lejos de la división de puertas.
-  const cy = m.tipo === 'bajo' ? y + 110 : m.hastaMesa ? h - ((REPOSTEROS.altos.y0 + m.y1) / 2) * S : y + alto / 2;
+  // En las columnas el código va en el tramo alto, lejos de la división de puertas; en los
+  // bajos con puertas, al centro, lejos de los tiradores.
+  const cy =
+    m.tipo === 'bajo' && !m.puertas.length ? y + 110 : m.hastaMesa ? h - ((REPOSTEROS.altos.y0 + m.y1) / 2) * S : y + alto / 2;
   out += `<circle cx="${cx}" cy="${cy}" r="62" class="id-bg"/>` + text(cx, cy + 22, m.id, 'tid');
   return out;
 }
@@ -291,6 +293,10 @@ function alzado(id) {
     const x0 = Math.min(P.s(a.u0), P.s(a.u1)) * S;
     const wa = Math.abs(P.s(a.u1) - P.s(a.u0)) * S;
     c += rect(x0, h - a.y1 * S, wa, a.alto * S, a.tipo === 'tubo' ? 'apoyo apoyo-tubo' : 'apoyo');
+    for (const p of Object.values(a.placas ?? {})) {
+      const xp = Math.min(P.s(p.u0), P.s(p.u1)) * S;
+      c += rect(xp, h - p.y1 * S, Math.abs(P.s(p.u1) - P.s(p.u0)) * S, (p.y1 - p.y0) * S, 'apoyo apoyo-tubo');
+    }
     c += text(x0 + wa / 2, h - ((a.y0 + a.y1) / 2) * S + 20, a.id, 'tapoyo', 'text-anchor="end" dx="-40"');
   }
   c += rect(0, 0, w, h, 'marco');
@@ -361,9 +367,16 @@ function planta() {
     }
     const [x, z, w, hh] = caja(eq.pared, eq.u[0], eq.u[1], eq.d[0], eq.d[1]);
     c += rect(x * S, z * S, w * S, hh * S, instalacionNueva(eq) ? 'canaleta' : 'equipo');
-    if (!instalacionNueva(eq)) c += text((x + w / 2) * S, (z + hh / 2) * S + 18, eq.nombre.split(' ')[0], 'tequipo');
+    // Los guardados dentro de un bajo quedan bajo otros equipos: su nombre va sobre la caja.
+    const ty = eq.dentro ? z * S - 25 : (z + hh / 2) * S + 18;
+    if (!instalacionNueva(eq)) c += text((x + w / 2) * S, ty, eq.nombre.split(' ')[0], 'tequipo');
   }
   for (const a of apoyos) {
+    const base = a.placas?.base;
+    if (base) {
+      const [x, z, w, hh] = caja(a.pared, base.u0, base.u1, base.d0, base.d1);
+      altos += rect(x * S, z * S, w * S, hh * S, 'apoyo');
+    }
     const [x, z, w, hh] = caja(a.pared, a.u0, a.u1, a.d0, a.d1);
     altos += rect(x * S, z * S, w * S, hh * S, a.tipo === 'tubo' ? 'apoyo apoyo-tubo' : 'apoyo');
   }
@@ -399,7 +412,7 @@ function tablaModulos() {
         return out.join(' / ');
       })();
       const pared = { pared1: 'Pared 1', pared2: 'Pared 2', pared3: 'Pared 3' }[m.pared];
-      return `<tr><td><b>${m.id}</b></td><td>${m.hastaMesa ? 'Columna hasta la mesa' : m.tipo === 'alto' ? 'Alto' : 'Bajo abierto'}</td><td>${pared}</td>
+      return `<tr><td><b>${m.id}</b></td><td>${m.hastaMesa ? 'Columna hasta la mesa' : m.tipo === 'alto' ? 'Alto' : m.puertas.length ? 'Bajo con puertas' : 'Bajo abierto'}</td><td>${pared}</td>
         <td class="n">${cm(m.ancho)}</td><td class="n">${cm(m.alto)}</td><td class="n">${cm(m.fondo + (m.puertas.length || m.tapaFija ? REPOSTEROS.material.espesor : 0))}</td>
         <td class="n">${cm(m.y0)}</td><td class="n">${m.repisas.length}</td><td>${libres}</td><td>${puertas}${m.tapaFija ? ' + tapa fija ' + cm(m.tapaFija.u1 - m.tapaFija.u0) : ''}</td>
         <td>${m.espalda === 'melamina' ? 'Melamina 18 mm (vista)' : 'MDF 3 mm'}</td><td>${esc(m.contenido)}</td></tr>`;
@@ -516,7 +529,7 @@ function render() {
 
   document.getElementById('resumen').innerHTML = `
     <div class="card"><b>${modulos.filter((m) => m.tipo === 'alto').length}</b><span>módulos altos</span></div>
-    <div class="card"><b>${modulos.filter((m) => m.tipo === 'bajo').length}</b><span>módulos bajos abiertos</span></div>
+    <div class="card"><b>${modulos.filter((m) => m.tipo === 'bajo').length}</b><span>módulos bajos${modulos.some((m) => m.tipo === 'bajo' && m.puertas.length) ? '' : ' abiertos'}</span></div>
     <div class="card"><b>${puertas}</b><span>puertas</span></div>
     <div class="card"><b>${datos.piezas.reduce((s, p) => s + p.cant, 0)}</b><span>piezas</span></div>
     <div class="card wide"><b>${soles(b.total)}</b><span>total aproximado${b.manoObra ? ' con mano de obra' : ''}</span></div>

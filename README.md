@@ -84,7 +84,7 @@ Para cambiar el nombre del proyecto de Cloudflare, edita `PROYECTO_PAGES` en el 
 
 **Barra superior:**
 
-- **V1 / V2:** versión del diseño de reposteros (ver más abajo).
+- **V1 a V4:** versión del diseño de reposteros (ver más abajo).
 - **Vistas:** isométrica, superior y alzados de cada pared. En los alzados se ocultan los objetos que quedan entre la cámara y la pared; al girar la cámara más de unos grados vuelven a aparecer.
 - **Capas:** cotas (coloreadas según la confianza de la medida), ocultado automático de las paredes que tapan la vista, techo y rejilla de 10 cm en el piso.
 - **Reposteros:** muestra u oculta los muebles propuestos, sus puertas y los volúmenes de referencia de los equipos (microondas, freidora de aire, tacho de basura y bidón de agua).
@@ -99,9 +99,11 @@ Si alguna medida deja la geometría incoherente (por ejemplo, dos módulos que s
 | Versión | Descripción |
 | --- | --- |
 | V1 | Altos de 1.50 a 2.30 m (60 cm sobre la mesa). Incluye el repostero A2 sobre la estufa. |
-| V2 | Altos bajados a 1.40 m (50 cm sobre la mesa) para alcanzarlos con 1.50 m de estatura. Sin repostero sobre la estufa. Los altos de la Pared 3 se apoyan en la mesa (pie P1 y tubo T1) y todo el montaje es desmontable. **Es la versión por defecto.** |
+| V2 | Altos bajados a 1.40 m (50 cm sobre la mesa) y de 35 cm de fondo, para alcanzarlos con 1.50 m de estatura. Sin repostero sobre la estufa. La Pared 3 forma una C con dos columnas (C1 y C2) apoyadas en la mesa; el verdulero pasa a la Pared 4 y el montaje es desmontable. |
+| V3 | Como la V2, pero C2 se une al especiero en un alto (A5) sostenido por un tubo (T1); licuadora y extractor en la Pared 3, con una extensión eléctrica en canaleta y dos tomacorrientes nuevos. |
+| V4 | Como la V3, con puertas en los bajos (B5 queda abierto: se llega a él por el bajo del lavadero). B3 igual a B2 por la llave de agua, con el extractor guardado abajo; licuadora en la Pared 2 como en la V2; pata T1 de 1½" con placa superior y base. **Es la versión por defecto.** |
 
-La versión activa se elige con el parámetro `?v=1` o `?v=2` en la URL y se recuerda en el `localStorage` del navegador. Cambiar de versión recarga la página.
+La versión activa se elige con el parámetro `?v=N` en la URL; sin él se abre la V4. Cambiar de versión recarga la página.
 
 ## Página de planos y presupuesto
 

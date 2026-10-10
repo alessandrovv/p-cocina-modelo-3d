@@ -10,14 +10,15 @@
  *
  * Decisiones del usuario:
  *   - Melamina blanca de 18 mm.
- *   - Bajo las mesas de cerámica: módulos abiertos, sin puertas ni cajones.
+ *   - Bajo las mesas de cerámica: módulos abiertos, sin puertas ni cajones
+ *     (desde la versión 4 llevan puertas).
  *   - Altos en la Pared 2 (hasta 2.30 m) y en la Pared 3; en la Pared 3
  *     sobresalen del muro de 1.85 m con espalda de melamina vista.
  *   - Microondas y freidora sobre la mesa; arrocera, licuadora y extractor
  *     de jugos guardados bajo las mesas; bidón de agua en su lugar actual.
  *
  * Versiones (ver VERSIONES): la 1 es el diseño base; las siguientes lo
- * modifican. La activa se elige con ?v=N en la URL y se recuerda en localStorage.
+ * modifican. La activa se elige con ?v=N en la URL; sin ella, VERSION_POR_DEFECTO.
  */
 import { DIM } from './dimensiones.js';
 
@@ -504,20 +505,70 @@ export const VERSIONES = {
       };
     },
   },
+  4: {
+    nombre: 'Versión 4',
+    descripcion:
+      'Como la versión 3, con puertas en los bajos; B3 igual a B2 (la llave de agua queda detrás) con el extractor guardado abajo; licuadora en la Pared 2 como en la versión 2; pata T1 reforzada con placa superior y base',
+    aplicar: (R) => {
+      const V2 = VERSIONES[2].aplicar(R);
+      const V3 = VERSIONES[3].aplicar(R);
+      const esp = R.material.espesor;
+      const tubo = 0.038; // 1½": más rígido que el de 1" de la versión 3
+      const uA6 = V3.modulos.find((m) => m.id === 'A6').u;
+      const dTubo = V3.altos.fondo - 0.06;
+      // 44 cm libres abajo: entra el extractor (40 cm) con holgura para sacarlo.
+      const repisasBajo = [0.44];
+      const yPisoBajo = DIM.mesas.zocalo.alto + esp;
+      // Puertas de los bajos: la bisagra va del lado contrario a los pilares de las mesas.
+      // B5 sigue abierto: es el esquinero al que se llega por el bajo del lavadero.
+      const cambios = {
+        // Su frente queda detrás del lateral de B2 hasta 0.60 m: ahí va una tapa fija.
+        B1: { tapaFija: [0.16, 0.6], puertas: 1, bisagra: 'inicio' },
+        B2: { repisas: repisasBajo, puertas: 2, contenido: 'Moldes, bandejas y artículos grandes (44 cm libres abajo)' },
+        B3: {
+          repisas: repisasBajo,
+          puertas: 2,
+          contenido: 'Abajo el extractor de jugos; arriba tapers y recipientes. La llave de agua queda al fondo (registro en el fondo)',
+        },
+        B4: { puertas: 1, bisagra: 'fin' },
+        B6: { puertas: 1, bisagra: 'inicio' },
+      };
+      const uB3 = V3.modulos.find((m) => m.id === 'B3').u;
+      return {
+        ...V3,
+        modulos: V3.modulos.map((m) => (cambios[m.id] ? { ...m, ...cambios[m.id] } : m)),
+        apoyos: [
+          {
+            id: 'T1',
+            tipo: 'tubo',
+            pared: 'pared3',
+            u: [uA6[0] - tubo / 2, uA6[0] + tubo / 2],
+            d: [dTubo - tubo / 2, dTubo + tubo / 2],
+            // Placa superior atornillada a la base de A5 y de A6 (abarca la unión); base con tope de goma.
+            placas: { superior: 0.1, base: 0.08, espesor: 0.006, goma: 0.004 },
+            contenido: 'Pata de tubo cuadrado de aluminio de 1½" bajo la unión de A5 y A6, con placa superior de 10 × 10 cm y base de 8 × 8 cm con tope de goma',
+          },
+        ],
+        equipos: V3.equipos.map((q) => {
+          if (q.id === 'licuadora') return V2.equipos.find((x) => x.id === 'licuadora');
+          // Guardado en el tramo bajo de B3, hacia el frente y a la izquierda: la llave queda accesible.
+          if (q.id === 'extractor')
+            return { ...q, u: [uB3[0] + 0.03, uB3[0] + 0.25], d: [0.2, 0.53], y: [yPisoBajo, yPisoBajo + 0.4], dentro: 'B3' };
+          // Sin la licuadora, el tomacorriente nuevo queda para usar equipos en la mesa libre.
+          if (q.id === 'tomaLicuadora') return { ...q, id: 'tomaMesa' };
+          return q;
+        }),
+      };
+    },
+  },
 };
 
-const CLAVE_VERSION = 'cocina-version';
-const ULTIMA = Math.max(...Object.keys(VERSIONES).map(Number));
+export const VERSION_POR_DEFECTO = 4;
 
 function elegirVersion() {
-  if (typeof window === 'undefined') return ULTIMA;
-  const valida = (v) => (VERSIONES[v] ? Number(v) : null);
-  const v =
-    valida(new URLSearchParams(window.location.search).get('v')) ??
-    valida(window.localStorage.getItem(CLAVE_VERSION)) ??
-    ULTIMA;
-  window.localStorage.setItem(CLAVE_VERSION, String(v));
-  return v;
+  if (typeof window === 'undefined') return VERSION_POR_DEFECTO;
+  const v = new URLSearchParams(window.location.search).get('v');
+  return VERSIONES[v] ? Number(v) : VERSION_POR_DEFECTO;
 }
 
 export const VERSION = elegirVersion();
@@ -625,14 +676,30 @@ export function tiradorAbajo(hoja, d = DIM) {
   return hoja.y0 > d.mesas.alto + 0.1;
 }
 
-/** Apoyos de los altos sobre la mesa (de la cara superior de la mesa a la base del alto). */
+/**
+ * Apoyos de los altos sobre la mesa (de la cara superior de la mesa a la base del alto).
+ * Con `placas`, agrega la placa superior (bajo los altos) y la base (sobre la mesa),
+ * cuadradas y centradas en el tubo.
+ */
 export function resolverApoyos(R = REPOSTEROS, d = DIM) {
   return (R.apoyos ?? []).map((a) => {
     const [u0, u1] = a.u;
     const [d0, d1] = a.d;
     const y0 = d.mesas.alto;
     const y1 = R.altos.y0;
-    return { ...a, u0, u1, d0, d1, y0, y1, ancho: u1 - u0, fondo: d1 - d0, alto: y1 - y0 };
+    const uc = (u0 + u1) / 2;
+    const dc = (d0 + d1) / 2;
+    const placa = (lado, ya, yb) => ({ u0: uc - lado / 2, u1: uc + lado / 2, d0: dc - lado / 2, d1: dc + lado / 2, y0: ya, y1: yb });
+    const p = a.placas;
+    const g = p?.goma ?? 0;
+    const placas = p
+      ? {
+          superior: placa(p.superior, y1 - p.espesor, y1),
+          base: placa(p.base, y0 + g, y0 + g + p.espesor),
+          ...(g ? { goma: placa(p.base, y0, y0 + g) } : {}),
+        }
+      : null;
+    return { ...a, u0, u1, d0, d1, y0, y1, ancho: u1 - u0, fondo: d1 - d0, alto: y1 - y0, placas };
   });
 }
 
@@ -714,10 +781,15 @@ export function validarReposteros(R = REPOSTEROS, d = DIM) {
     if (!cabe) avisos.push(`${q.nombre} no cabe en el módulo ${m.id}.`);
   }
   for (const a of resolverApoyos(R, d)) {
-    if (a.u1 > (largoMesa[a.pared] ?? 0) + 1e-6 || a.d1 > d.mesas.fondo)
+    const h = a.placas?.base ?? a;
+    if (h.u1 > (largoMesa[a.pared] ?? 0) + 1e-6 || h.d1 > d.mesas.fondo)
       avisos.push(`El apoyo ${a.id} queda fuera de la mesa.`);
-    const caja = cajaMundo(a.pared, [a.u0, a.u1], [a.d0, a.d1], [a.y0, a.y1], d);
-    for (const { q, ...c } of equipos) if (seCruzan(caja, c)) avisos.push(`El apoyo ${a.id} choca con ${q.nombre.toLowerCase()}.`);
+    const piezas = [a, ...Object.values(a.placas ?? {})];
+    const cajasApoyo = piezas.map((p) => cajaMundo(a.pared, [p.u0, p.u1], [p.d0, p.d1], [p.y0, p.y1], d));
+    for (const { q, ...c } of equipos)
+      if (cajasApoyo.some((caja) => seCruzan(caja, c))) avisos.push(`El apoyo ${a.id} choca con ${q.nombre.toLowerCase()}.`);
+    const sup = a.placas?.superior;
+    if (sup && sup.d1 > R.altos.fondo + 1e-6) avisos.push(`La placa superior del apoyo ${a.id} sobresale del frente de los altos.`);
   }
   return avisos;
 }
